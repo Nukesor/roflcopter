@@ -9,6 +9,14 @@ from rofl.colors import style, tty_colors
 class App:
     def __init__(self, word: str):
         """Initialize the app and the initial screen."""
+        self.modes = {
+            "bold": {"counter": 0, "interval": 2},
+            # "italic": {"counter": 0, "interval": 3},
+            # "inverse": {"counter": 0, "interval": 15},
+            # "blinking": {"counter": 0, "interval": 3},
+        }
+        self.bold_interval = 0
+
         self.original_word = word
         self.style_word()
 
@@ -22,9 +30,15 @@ class App:
             self.increment_offset()
 
     def style_word(self):
-        self.word = []
+        word = []
+        modes = []
 
-        modes = ["bold"]
+        # Apply all modes in their specified intervals
+        for key, info in self.modes.items():
+            info["counter"] += 1
+            info["counter"] = info["counter"] % info["interval"]
+            if info["counter"] == 0:
+                modes.append(key)
 
         # Give every character their own color.
         # Each character is prefixed with an ASCII escape sequence.
@@ -33,12 +47,13 @@ class App:
         for index, char in enumerate(list(self.original_word)):
             index = index % len(color_keys)
             color = color_keys[index]
-            print(color)
-            self.word.append(style(char, color, modes))
+            word.append(style(char, color, modes))
+
+        return word
 
     def increment_offset(self):
         self.offset += 1
-        self.offset = self.offset % len(self.word)
+        self.offset = self.offset % len(self.original_word)
 
     def calculate_sleep(self, negative: bool) -> float:
         """Calculate the current sleep time and whether a new random."""
@@ -59,17 +74,19 @@ class App:
 
     def print_line(self):
         """Print a new line filled with the word"""
+        word = self.style_word()
+
         # Shift the word by the current offset
-        start = self.word[0 : self.offset]
-        end = self.word[self.offset : len(self.word)]
+        start = word[0 : self.offset]
+        end = word[self.offset : len(word)]
         shifted_chars = end + start
 
         rotated_string = "".join(shifted_chars) + " "
 
         # Fill the line with as many full words as possible
-        full_repetitions = int(self.terminal_width.columns / (len(self.word) + 1))
+        full_repetitions = int(self.terminal_width.columns / (len(word) + 1))
         full_string = rotated_string * full_repetitions
-        total_length = (len(self.word) + 1) * full_repetitions
+        total_length = (len(word) + 1) * full_repetitions
 
         # Fill the remaining space with a partial word
         remaining_length = self.terminal_width.columns - total_length

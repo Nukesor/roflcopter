@@ -17,7 +17,9 @@ tty_colors = {
 tty_modes = {
     "reset": "0",
     "bold": "1",
+    "italic": "3",
     "blinking": "5",
+    "inverse": "7",
 }
 
 
