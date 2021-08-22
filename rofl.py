@@ -6,11 +6,11 @@ import random
 
 
 class App:
-    def __init__(self):
+    def __init__(self, word):
         """Initialize the app and the initial screen."""
-        self.thingy = "ROFLCOPTER"
+        self.word = list(word)
         self.terminal_width = os.get_terminal_size()
-        self.sleep_factor = random.randrange(1, 5)
+        self.sleep_factor = random.randrange(1, 5) / 10
 
         # Initialize the screen
         self.offset = 0
@@ -20,7 +20,7 @@ class App:
 
     def increment_offset(self):
         self.offset += 1
-        self.offset = self.offset % len(self.thingy)
+        self.offset = self.offset % len(self.word)
 
     def calculate_sleep(self, negative: bool):
         """Calculate the current sleep time and whether a new random."""
@@ -40,18 +40,21 @@ class App:
         return sleep_time
 
     def print_line(self):
-        """Print the thingy"""
+        """Print a new line filled with the word"""
         # Shift the word by the current offset
-        first = self.thingy[0 : self.offset]
-        second = self.thingy[self.offset : len(self.thingy)]
-        string = f"{second}{first} "
+        first = self.word[0 : self.offset]
+        second = self.word[self.offset : len(self.word)]
+
+        compiled_first = "".join(first)
+        compiled_second = "".join(second)
+        string = f"{compiled_second}{compiled_first} "
 
         # Fill the line with as many full words as possible
-        full_string = string * int(self.terminal_width.columns / (len(self.thingy) + 1))
+        full_string = string * int(self.terminal_width.columns / (len(self.word) + 1))
 
         # Fill the remaining space with a partial word
         remaining_length = self.terminal_width.columns - len(full_string)
-        full_string += string[0:remaining_length]
+        full_string += "".join(string[0:remaining_length])
 
         # PRINT IT
         print(full_string)
@@ -67,7 +70,7 @@ class App:
 
 
 def main():
-    app = App()
+    app = App("ROFLCOPTER")
     app.run()
 
 
