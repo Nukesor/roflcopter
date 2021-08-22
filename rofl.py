@@ -45,6 +45,9 @@ class App:
         second = self.thingy[self.offset : len(self.thingy)]
         string = f"{second}{first} "
         full_string = string * int(self.terminal_width.columns / (len(self.thingy) + 1))
+
+        remaining_length = self.terminal_width.columns - len(full_string)
+        full_string += string[0:remaining_length]
         print(full_string)
 
     def run(self):
