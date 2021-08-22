@@ -3,23 +3,14 @@ import math
 import os
 import random
 
-from rofl.colors import style, colors
+from rofl.colors import style, tty_colors
 
 
 class App:
     def __init__(self, word: str):
         """Initialize the app and the initial screen."""
-        self.word = []
-
-        # Give every character their own color.
-        # Each character is prefixed with an ASCII escape sequence.
-        # The mode is resetted after each character as well.
-        color_keys = list(colors.keys())
-        for index, char in enumerate(list(word)):
-            index = index % len(color_keys)
-            color = color_keys[index]
-            print(color)
-            self.word.append(style(char, color, False))
+        self.original_word = word
+        self.style_word()
 
         self.terminal_width = os.get_terminal_size()
         self.sleep_factor = random.randrange(1, 5) / 10
@@ -29,6 +20,21 @@ class App:
         for _ in range(0, self.terminal_width.lines):
             self.print_line()
             self.increment_offset()
+
+    def style_word(self):
+        self.word = []
+
+        modes = ["bold"]
+
+        # Give every character their own color.
+        # Each character is prefixed with an ASCII escape sequence.
+        # The mode is resetted after each character as well.
+        color_keys = list(tty_colors.keys())
+        for index, char in enumerate(list(self.original_word)):
+            index = index % len(color_keys)
+            color = color_keys[index]
+            print(color)
+            self.word.append(style(char, color, modes))
 
     def increment_offset(self):
         self.offset += 1

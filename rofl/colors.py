@@ -1,4 +1,6 @@
-colors = {
+from typing import List
+
+tty_colors = {
     "bright_red": "91",
     "bright_orange": "38;5;208",
     "bright_yellow": "93",
@@ -12,21 +14,21 @@ colors = {
 }
 
 
-modes = {
+tty_modes = {
     "reset": "0",
     "bold": "1",
     "blinking": "5",
 }
 
 
-def style(text: str, color: str, blinking: bool = False) -> str:
+def style(text: str, color: str, modes: List[str]) -> str:
     """Apply ansi styling to a given text"""
 
-    color = colors[color]
+    color = tty_colors[color]
     attributes = [color]
 
-    if blinking:
-        attributes.append(modes["blinking"])
+    for mode in modes:
+        attributes.append(tty_modes[mode])
 
     joined_attributes = ";".join(attributes)
     styled = f"\x1b[{joined_attributes}m{text}\x1b[0m"
