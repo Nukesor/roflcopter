@@ -41,13 +41,19 @@ class App:
 
     def print_line(self):
         """Print the thingy"""
+        # Shift the word by the current offset
         first = self.thingy[0 : self.offset]
         second = self.thingy[self.offset : len(self.thingy)]
         string = f"{second}{first} "
+
+        # Fill the line with as many full words as possible
         full_string = string * int(self.terminal_width.columns / (len(self.thingy) + 1))
 
+        # Fill the remaining space with a partial word
         remaining_length = self.terminal_width.columns - len(full_string)
         full_string += string[0:remaining_length]
+
+        # PRINT IT
         print(full_string)
 
     def run(self):
