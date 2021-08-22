@@ -2,6 +2,7 @@
 import time
 import math
 import os
+import random
 
 terminal_width = os.get_terminal_size()
 thingy = "ROFLCOPTER"
@@ -15,14 +16,22 @@ def main():
         offset += 1
         offset = offset % length
 
+    negative = True
+    sleep_factor = random.randrange(1, 5)
     while True:
         print_line(offset)
         offset += 1
         offset = offset % length
         sleep_time = math.sin(time.time())
 
-        if sle
-        time.sleep(math.abs(sleep_time))
+        if sleep_time > 0 and negative:
+            negative = False
+            sleep_factor = random.randrange(1, 5)
+        elif sleep_time < 0 and not negative:
+            negative = True
+            sleep_factor = random.randrange(1, 5)
+
+        time.sleep(abs(sleep_time) * sleep_factor / 10)
 
 
 def print_line(offset):
