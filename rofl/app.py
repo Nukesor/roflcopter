@@ -1,14 +1,26 @@
-#!/bin/env python
 import time
 import math
 import os
 import random
 
+from rofl.colors import style, colors
+
 
 class App:
-    def __init__(self, word):
+    def __init__(self, word: str):
         """Initialize the app and the initial screen."""
-        self.word = list(word)
+        self.word = []
+
+        # Give every character their own color.
+        # Each character is prefixed with an ASCII escape sequence.
+        # The mode is resetted after each character as well.
+        color_keys = list(colors.keys())
+        for index, char in enumerate(list(word)):
+            index = index % len(color_keys)
+            color = color_keys[index]
+            print(color)
+            self.word.append(style(char, color, False))
+
         self.terminal_width = os.get_terminal_size()
         self.sleep_factor = random.randrange(1, 5) / 10
 
@@ -22,7 +34,7 @@ class App:
         self.offset += 1
         self.offset = self.offset % len(self.word)
 
-    def calculate_sleep(self, negative: bool):
+    def calculate_sleep(self, negative: bool) -> float:
         """Calculate the current sleep time and whether a new random."""
         sleep_time = math.sin(time.time())
 
@@ -42,19 +54,20 @@ class App:
     def print_line(self):
         """Print a new line filled with the word"""
         # Shift the word by the current offset
-        first = self.word[0 : self.offset]
-        second = self.word[self.offset : len(self.word)]
+        start = self.word[0 : self.offset]
+        end = self.word[self.offset : len(self.word)]
+        shifted_chars = end + start
 
-        compiled_first = "".join(first)
-        compiled_second = "".join(second)
-        string = f"{compiled_second}{compiled_first} "
+        rotated_string = "".join(shifted_chars) + " "
 
         # Fill the line with as many full words as possible
-        full_string = string * int(self.terminal_width.columns / (len(self.word) + 1))
+        full_repetitions = int(self.terminal_width.columns / (len(self.word) + 1))
+        full_string = rotated_string * full_repetitions
+        total_length = (len(self.word) + 1) * full_repetitions
 
         # Fill the remaining space with a partial word
-        remaining_length = self.terminal_width.columns - len(full_string)
-        full_string += "".join(string[0:remaining_length])
+        remaining_length = self.terminal_width.columns - total_length
+        full_string += "".join(shifted_chars[0:remaining_length])
 
         # PRINT IT
         print(full_string)
@@ -67,11 +80,3 @@ class App:
             self.increment_offset()
             sleep_time = self.calculate_sleep(negative)
             time.sleep(sleep_time)
-
-
-def main():
-    app = App("ROFLCOPTER")
-    app.run()
-
-
-main()
