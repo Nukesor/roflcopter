@@ -8,10 +8,8 @@ pub struct State {
     pub font_dimensions: TextDimensions,
 
     pub word: String,
+    /// For each character of the word, a color will be assigned.
     pub colors: Vec<Color>,
-
-    pub y_offset: f32,
-    pub x_offset: f32,
 }
 
 impl State {
@@ -32,8 +30,6 @@ impl State {
             font_dimensions,
             word,
             colors,
-            y_offset: 0.0,
-            x_offset: 0.0,
         }
     }
 }
