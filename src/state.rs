@@ -11,6 +11,7 @@ pub struct State {
     pub colors: Vec<Color>,
 
     pub y_offset: f32,
+    pub x_offset: f32,
 }
 
 impl State {
@@ -32,6 +33,7 @@ impl State {
             word,
             colors,
             y_offset: 0.0,
+            x_offset: 0.0,
         }
     }
 }

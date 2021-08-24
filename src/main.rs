@@ -41,22 +41,23 @@ fn draw_line(state: &State, current_height: f32, line_count: usize, window_width
     let (word, colors) = offsetted_word_and_colors(state, offset);
 
     // Runner width variable for this line.
-    let mut current_width: f32 = 0.0;
+    let mut current_width: f32 = -window_width / 2.0;
     let mut color_offset = 0;
     loop {
-        for (index, character) in word.chars().enumerate() {
+        for character in word.chars() {
             // Exit condition, stop the loop, if the next char doesn't fit onto the screen
-            if current_width + glyph_width > window_width {
+            if current_width + glyph_width > window_width * 1.5 {
                 return;
             }
 
             // We have a smooth movement, which is why we move in
             let height = current_height - state.y_offset % state.font_dimensions.height;
+            let width = current_width - state.x_offset * state.word.len() as f32 * 2.0;
 
             // Draw the character at the next position.
             draw_text_ex(
                 &character.to_string(),
-                current_width,
+                width,
                 height,
                 TextParams {
                     font: state.font,
@@ -93,13 +94,18 @@ fn calculate_offsets(state: &mut State) -> usize {
 
     let dt = get_frame_time();
 
-    let movement_speed = state.font_dimensions.height * 40.0;
-
     // Calculate the amount that has been moved since the last frame.
     // We oscilate through a sinus curve every few seconds.
     // The sinus is offseted by 1, which helps us to stay in positive range.
-    let moved_amount = dt * ((time / 1000.0f64).sin() + 1.0) as f32 * movement_speed;
+    let y_movement_speed = state.font_dimensions.height * 20.0;
+    let y_rate = ((time / 1000.0f64).sin() + 1.0) as f32;
+    let moved_amount = dt * y_rate * y_movement_speed;
     state.y_offset = state.y_offset + moved_amount;
+
+    let x_movement_speed = state.font_dimensions.height * 1.0;
+    let x_rate = ((time * 0.3f64 / 1000.0f64).sin()) as f32;
+    let moved_amount = dt * x_rate * x_movement_speed;
+    state.x_offset = state.x_offset + moved_amount;
 
     let line = state.y_offset / state.font_dimensions.height;
     line as usize
