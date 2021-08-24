@@ -18,7 +18,7 @@ async fn main() {
         let window_width = screen_width();
 
         // This is used to simulate a constant upflow/downfloat simulation
-        let mut line = calculate_offsets(&mut state);
+        let mut line = calculate_offsets(&mut state, window_width);
 
         // We start at -100, as lines can shift upwards slowly
         let mut used_height = -100.0;
@@ -88,7 +88,7 @@ fn offsetted_word_and_colors(state: &State, offset: usize) -> (String, Vec<Color
     (word_end, colors_end)
 }
 
-fn calculate_offsets(state: &mut State) -> usize {
+fn calculate_offsets(state: &mut State, window_width: f32) -> usize {
     let start = SystemTime::now();
     let time = start.duration_since(UNIX_EPOCH).unwrap().as_millis() as f64;
 
@@ -101,6 +101,11 @@ fn calculate_offsets(state: &mut State) -> usize {
     let y_rate = ((time / 1000.0f64).sin() + 1.0) as f32;
     let moved_amount = dt * y_rate * y_movement_speed;
     state.y_offset = state.y_offset + moved_amount;
+    if state.y_offset < -window_width / 2.0 {
+        state.y_offset = -window_width / 2.0;
+    } else if state.y_offset > window_width / 2.0 {
+        state.y_offset = window_width / 2.0;
+    }
 
     let x_movement_speed = state.font_dimensions.height * 1.0;
     let x_rate = ((time * 0.3f64 / 1000.0f64).sin()) as f32;
