@@ -21,6 +21,46 @@ pub fn animate_wall(state: &State, animation: &mut WallAnimation) {
     }
 }
 
+/// Calculate the actual offsets depending on the delta time.
+///
+/// This function is responsible for the actual animation, by determining and updating the offset
+/// to the original start position.
+fn calculate_offsets(state: &State, animation: &mut WallAnimation, window_width: f32) -> usize {
+    let start = SystemTime::now();
+    let time = start.duration_since(UNIX_EPOCH).unwrap().as_millis() as f64;
+
+    let dt = get_frame_time();
+
+    // Calculate the amount that has been moved since the last frame.
+    // We oscilate through a sinus curve every few seconds.
+    // The sinus is offseted by 1, which helps us to stay in positive range.
+    let y_movement_speed = state.font_dimensions.height * 20.0;
+    let mut y_rate = ((time / 1000.0f64).sin() + 1.0) as f32;
+    // Enforce a minimum movement rate of 0.2
+    y_rate += y_rate.signum() * 0.2;
+
+    let moved_amount = dt * y_rate * y_movement_speed;
+    animation.y_offset = animation.y_offset + moved_amount;
+
+    // Set the movement speed relative to the text glyph width
+    let x_movement_speed = state.font_dimensions.width * 1.0;
+    let x_rate = ((time * 0.3f64 / 1000.0f64).sin()) as f32;
+    let moved_amount = dt * x_rate * x_movement_speed;
+    animation.x_offset = animation.x_offset + moved_amount;
+
+    // Prevent floating too far away, due to floating point imprecision
+    if animation.x_offset < -window_width / 2.0 {
+        animation.x_offset = -window_width / 2.0;
+    } else if animation.x_offset > window_width / 2.0 {
+        animation.x_offset = window_width / 2.0;
+    }
+
+    let line = animation.y_offset / state.font_dimensions.height;
+    line as usize
+}
+
+/// Draw one single line.
+/// Each line is drawn depending on the current animation offset, state and text dimensions.
 fn draw_line(
     state: &State,
     animation: &WallAnimation,
@@ -71,6 +111,9 @@ fn draw_line(
     }
 }
 
+/// Each line is offsetted to the previous by one.
+/// This calculates the color and character offset for the current line and prepares
+/// it for further usage.
 fn offsetted_word_and_colors(state: &State, offset: usize) -> (String, Vec<Color>) {
     let mut word_start = state.word.to_owned();
     let mut word_end = word_start.split_off(offset);
@@ -81,32 +124,4 @@ fn offsetted_word_and_colors(state: &State, offset: usize) -> (String, Vec<Color
     colors_end.append(&mut colors_start);
 
     (word_end, colors_end)
-}
-
-fn calculate_offsets(state: &State, animation: &mut WallAnimation, window_width: f32) -> usize {
-    let start = SystemTime::now();
-    let time = start.duration_since(UNIX_EPOCH).unwrap().as_millis() as f64;
-
-    let dt = get_frame_time();
-
-    // Calculate the amount that has been moved since the last frame.
-    // We oscilate through a sinus curve every few seconds.
-    // The sinus is offseted by 1, which helps us to stay in positive range.
-    let y_movement_speed = state.font_dimensions.height * 20.0;
-    let y_rate = ((time / 1000.0f64).sin() + 1.0) as f32;
-    let moved_amount = dt * y_rate * y_movement_speed;
-    animation.y_offset = animation.y_offset + moved_amount;
-    if animation.y_offset < -window_width / 2.0 {
-        animation.y_offset = -window_width / 2.0;
-    } else if animation.y_offset > window_width / 2.0 {
-        animation.y_offset = window_width / 2.0;
-    }
-
-    let x_movement_speed = state.font_dimensions.height * 1.0;
-    let x_rate = ((time * 0.3f64 / 1000.0f64).sin()) as f32;
-    let moved_amount = dt * x_rate * x_movement_speed;
-    animation.x_offset = animation.x_offset + moved_amount;
-
-    let line = animation.y_offset / state.font_dimensions.height;
-    line as usize
 }
