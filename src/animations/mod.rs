@@ -32,12 +32,16 @@ impl CopterAnimation {
     pub fn new(position: Position) -> Animation {
         Animation::Copter(CopterAnimation {
             rotor_direction: Direction::Left,
-            rotor_duration: Duration::from_secs(0),
+            rotor_duration: Duration::from_millis(200),
             rotor_timer: Duration::from_secs(0),
-            state: CopterState::Hovering {
-                duration: Duration::from_millis(1000),
-                timer: Duration::from_secs(0),
+            //state: CopterState::Hovering {
+            //    duration: Duration::from_millis(1000),
+            //    timer: Duration::from_secs(0),
+            //    position,
+            //},
+            state: CopterState::Flying {
                 position,
+                dest: Position { x: 100.0, y: 100.0 },
             },
         })
     }

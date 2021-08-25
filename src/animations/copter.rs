@@ -2,13 +2,13 @@ use std::{f32::consts::PI, ops::Add, time::Duration};
 
 use macroquad::prelude::*;
 
-use super::{CopterAnimation, Direction, Position};
+use super::{helper::delta_duration, CopterAnimation, Direction, Position};
 use crate::state::State;
 
 #[derive(Debug, Clone)]
 pub enum CopterState {
     Flying {
-        src: Position,
+        position: Position,
         dest: Position,
     },
     Hovering {
@@ -19,54 +19,56 @@ pub enum CopterState {
 }
 
 pub fn animate_copter(state: &State, animation: &mut CopterAnimation) {
-    //let window_height = screen_height();
-    //let window_width = screen_width();
-
+    animation.rotor_timer = animation.rotor_timer.checked_add(delta_duration()).unwrap();
+    if animation.rotor_timer > animation.rotor_duration {
+        match animation.rotor_direction {
+            Direction::Left => animation.rotor_direction = Direction::Right,
+            Direction::Right => animation.rotor_direction = Direction::Left,
+        }
+        animation.rotor_timer = Duration::from_secs(0)
+    }
     draw(state, animation);
 }
 
 fn draw(state: &State, animation: &mut CopterAnimation) {
     match animation.state {
-        CopterState::Flying { .. } => {}
+        CopterState::Flying {
+            ref position,
+            ref dest,
+        } => {
+            draw_copter(state, &animation.rotor_direction, position.x, position.y);
+        }
         CopterState::Hovering {
             ref duration,
             ref mut timer,
             ref position,
         } => {
-            let dt = (get_frame_time() * 1000.0 * 1000.0) as u64;
-            *timer = timer.checked_add(Duration::from_micros(dt)).unwrap();
-            draw_hover(state, &animation.rotor_direction, duration, timer, position);
+            // We animate hovering by following in a sinus curve depending on the time
+            let current_rotation = timer.as_millis() as f32 / duration.as_millis() as f32;
+            let offset = (current_rotation * 2.0 * PI).sin();
+            let x_start = position.x;
+            let y_start = position.y + offset * state.font_dimensions.height;
+
+            *timer = timer.checked_add(delta_duration()).unwrap();
+            draw_copter(state, &animation.rotor_direction, x_start, y_start);
         }
     }
 }
 
-fn draw_hover(
-    state: &State,
-    rotor_direction: &Direction,
-    duration: &Duration,
-    timer: &mut Duration,
-    position: &Position,
-) {
+fn draw_copter(state: &State, rotor_direction: &Direction, x_start: f32, mut y: f32) {
+    let mut x: f32;
     let art = get_ascii_art(rotor_direction);
 
     //println!("timer: {:?}, duration: {:?}", timer, duration);
     //println!("offset: {}", offset);
     //println!("current_rotation: {}", offset);
-
-    // We animate hovering by following in a sinus curve depending on the time
-    let current_rotation = timer.as_millis() as f32 / duration.as_millis() as f32;
-    let offset = (current_rotation * 2.0 * PI).sin();
-    let x_start_position = position.x;
-    let mut x_position = x_start_position;
-    let mut y_position = position.y + offset * state.font_dimensions.height;
-
     for line in art.lines() {
-        x_position = x_start_position;
+        x = x_start;
         for character in line.chars() {
             draw_text_ex(
                 &character.to_string(),
-                x_position,
-                y_position,
+                x,
+                y,
                 TextParams {
                     font: state.font,
                     font_size: state.font_size,
@@ -74,11 +76,11 @@ fn draw_hover(
                     ..Default::default()
                 },
             );
-            x_position += state.font_dimensions.width;
+            x += state.font_dimensions.width;
         }
 
         // Move the draw position to the next
-        y_position += state.font_dimensions.height;
+        y += state.font_dimensions.height;
     }
 }
 
