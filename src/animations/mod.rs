@@ -9,6 +9,8 @@ pub use copter::*;
 pub use helper::*;
 pub use wall::animate_wall;
 
+use crate::state::State;
+
 #[derive(Debug, Clone)]
 pub enum Animation {
     Wall(WallAnimation),
@@ -26,15 +28,17 @@ pub struct CopterAnimation {
     pub rotor_direction: Direction,
     pub rotor_duration: Duration,
     pub rotor_timer: Duration,
+    pub copter_images: CopterImages,
     pub state: CopterState,
 }
 
 impl CopterAnimation {
-    pub fn new(position: Vector2<f32>) -> Animation {
+    pub fn new(state: &State, position: Vector2<f32>) -> Animation {
         Animation::Copter(CopterAnimation {
             rotor_direction: Direction::Left,
             rotor_duration: Duration::from_millis(200),
             rotor_timer: Duration::from_secs(0),
+            copter_images: CopterImages::new(state),
             state: CopterState::Hovering {
                 duration: Duration::from_millis(1000),
                 timer: Duration::from_secs(0),

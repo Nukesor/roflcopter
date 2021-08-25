@@ -22,7 +22,10 @@ async fn main() {
         y_offset: 0.0,
         x_offset: 0.0,
     });
-    let mut animation = CopterAnimation::new(Vector2::new(window_width / 2.0, window_height / 2.0));
+    let mut animation = CopterAnimation::new(
+        &state,
+        Vector2::new(window_width / 2.0, window_height / 2.0),
+    );
 
     loop {
         clear_background(BLACK);
@@ -41,6 +44,9 @@ async fn main() {
 }
 
 fn setup() {
+    // Beautify panics for better debug output.
+    better_panic::install();
+
     let verbosity = 0;
     // Set the verbosity level of the logger.
     let level = match verbosity {
