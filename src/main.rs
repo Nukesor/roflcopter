@@ -18,12 +18,23 @@ async fn main() {
         x_offset: 0.0,
     });
 
+    let window_height = screen_height();
+    let window_width = screen_width();
+
+    animation = CopterAnimation::new(Position {
+        x: window_width / 2.0,
+        y: window_height / 2.0,
+    });
+
     loop {
         clear_background(BLACK);
 
         match animation {
             Animation::Wall(ref mut inner) => {
                 animate_wall(&state, inner);
+            }
+            Animation::Copter(ref mut inner) => {
+                animate_copter(&state, inner);
             }
         }
 
