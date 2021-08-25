@@ -9,3 +9,4 @@ edition = "2018"
 macroquad = "0.3"
 log = "0.4"
 simplelog = { version = "0.10", default-features = false }
+cgmath = "0.18"

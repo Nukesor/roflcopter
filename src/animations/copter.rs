@@ -1,20 +1,22 @@
-use std::{f32::consts::PI, ops::Add, time::Duration};
+use std::{f32::consts::PI, time::Duration};
 
+use cgmath::Vector2;
 use macroquad::prelude::*;
 
-use super::{helper::delta_duration, CopterAnimation, Direction, Position};
+use super::{helper::delta_duration, CopterAnimation, Direction};
 use crate::state::State;
 
 #[derive(Debug, Clone)]
 pub enum CopterState {
     Flying {
-        position: Position,
-        dest: Position,
+        position: Vector2<f32>,
+        dest: Vector2<f32>,
     },
     Hovering {
         duration: Duration,
         timer: Duration,
-        position: Position,
+        position: Vector2<f32>,
+        copter_direction: Direction,
     },
 }
 
@@ -36,12 +38,25 @@ fn draw(state: &State, animation: &mut CopterAnimation) {
             ref position,
             ref dest,
         } => {
-            draw_copter(state, &animation.rotor_direction, position.x, position.y);
+            let direction = if position.x < dest.x {
+                Direction::Left
+            } else {
+                Direction::Right
+            };
+
+            draw_copter(
+                state,
+                &animation.rotor_direction,
+                position.x,
+                position.y,
+                &direction,
+            );
         }
         CopterState::Hovering {
             ref duration,
             ref mut timer,
             ref position,
+            ref copter_direction,
         } => {
             // We animate hovering by following in a sinus curve depending on the time
             let current_rotation = timer.as_millis() as f32 / duration.as_millis() as f32;
@@ -50,14 +65,26 @@ fn draw(state: &State, animation: &mut CopterAnimation) {
             let y_start = position.y + offset * state.font_dimensions.height;
 
             *timer = timer.checked_add(delta_duration()).unwrap();
-            draw_copter(state, &animation.rotor_direction, x_start, y_start);
+            draw_copter(
+                state,
+                &animation.rotor_direction,
+                x_start,
+                y_start,
+                copter_direction,
+            );
         }
     }
 }
 
-fn draw_copter(state: &State, rotor_direction: &Direction, x_start: f32, mut y: f32) {
+fn draw_copter(
+    state: &State,
+    rotor_direction: &Direction,
+    x_start: f32,
+    mut y: f32,
+    copter_direction: &Direction,
+) {
     let mut x: f32;
-    let art = get_ascii_art(rotor_direction);
+    let art = get_ascii_art(rotor_direction, copter_direction);
 
     //println!("timer: {:?}, duration: {:?}", timer, duration);
     //println!("offset: {}", offset);
@@ -84,18 +111,19 @@ fn draw_copter(state: &State, rotor_direction: &Direction, x_start: f32, mut y: 
     }
 }
 
-fn get_ascii_art(direction: &Direction) -> String {
-    match direction {
-        Direction::Left => "
-   ROFL:ROFL:
+fn get_ascii_art(rotor_direction: &Direction, copter_direction: &Direction) -> String {
+    match copter_direction {
+        Direction::Right => match rotor_direction {
+            Direction::Left => "
+   LFOR:LFOR:
          ___^___ _
  L    __/      [] \\
 LOL===__           \\
  L      \\___ ___ ___]
             I   I
           ----------/"
-            .to_string(),
-        Direction::Right => "
+                .to_string(),
+            Direction::Right => "
             :ROFL:ROFL
          ___^___ _
 L L   __/      [] \\
@@ -103,6 +131,27 @@ L L   __/      [] \\
 L L     \\___ ___ ___]
             I   I
           ----------/"
-            .to_string(),
+                .to_string(),
+        },
+        Direction::Left => match rotor_direction {
+            Direction::Left => "
+ROFL:ROFL:
+    _ ___^___
+   / []      \\__    L
+  /           __===LOL
+ [___ ___ ___/      L
+      I   I
+ \\----------          "
+                .to_string(),
+            Direction::Right => "
+         :LFOR:LFOR
+    _ ___^___
+   / []      \\__   L L
+  /           __===LOL
+ [___ ___ ___/     L L
+      I   I
+ \\----------          "
+                .to_string(),
+        },
     }
 }

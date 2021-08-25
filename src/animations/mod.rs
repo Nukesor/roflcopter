@@ -4,6 +4,7 @@ pub mod wall;
 
 use std::time::Duration;
 
+use cgmath::Vector2;
 pub use copter::*;
 pub use helper::*;
 pub use wall::animate_wall;
@@ -29,20 +30,21 @@ pub struct CopterAnimation {
 }
 
 impl CopterAnimation {
-    pub fn new(position: Position) -> Animation {
+    pub fn new(position: Vector2<f32>) -> Animation {
         Animation::Copter(CopterAnimation {
             rotor_direction: Direction::Left,
             rotor_duration: Duration::from_millis(200),
             rotor_timer: Duration::from_secs(0),
-            //state: CopterState::Hovering {
-            //    duration: Duration::from_millis(1000),
-            //    timer: Duration::from_secs(0),
-            //    position,
-            //},
-            state: CopterState::Flying {
+            state: CopterState::Hovering {
+                duration: Duration::from_millis(1000),
+                timer: Duration::from_secs(0),
                 position,
-                dest: Position { x: 100.0, y: 100.0 },
+                copter_direction: Direction::Left,
             },
+            //state: CopterState::Flying {
+            //    position,
+            //    dest: Vector2::new(100.0, 100.0),
+            //},
         })
     }
 }

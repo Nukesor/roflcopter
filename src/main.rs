@@ -1,3 +1,4 @@
+use cgmath::Vector2;
 use macroquad::prelude::*;
 use simplelog::{Config, LevelFilter, SimpleLogger};
 
@@ -13,18 +14,15 @@ async fn main() {
     setup();
 
     let state = State::new().await;
-    let mut animation = Animation::Wall(WallAnimation {
-        y_offset: 0.0,
-        x_offset: 0.0,
-    });
 
     let window_height = screen_height();
     let window_width = screen_width();
 
-    animation = CopterAnimation::new(Position {
-        x: window_width / 2.0,
-        y: window_height / 2.0,
+    let mut _animation = Animation::Wall(WallAnimation {
+        y_offset: 0.0,
+        x_offset: 0.0,
     });
+    let mut animation = CopterAnimation::new(Vector2::new(window_width / 2.0, window_height / 2.0));
 
     loop {
         clear_background(BLACK);
