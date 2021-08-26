@@ -23,6 +23,9 @@ pub enum Phase {
     Out,
 }
 
+/// The percentile of the screen height, a single char should occupy.
+static RELATIVE_FONT_SIZE: f32 = 60.0;
+
 pub struct State {
     pub word: String,
     pub font: Font,
@@ -56,7 +59,7 @@ impl State {
         let font = load_ttf_font("fonts/RobotoMono-SemiBold.ttf")
             .await
             .expect("Font couldn't be loaded");
-        let font_size = (window_height / 50.0) as u16;
+        let font_size = (window_height / RELATIVE_FONT_SIZE) as u16;
         let font_dimensions = measure_text("j", Some(font), font_size, 1.0);
 
         let word = "ROFLCOPTER".to_string();
@@ -188,7 +191,7 @@ impl State {
             self.window_height = height;
             self.window_width = width;
 
-            self.font_size = (self.window_height / 50.0) as u16;
+            self.font_size = (self.window_height / RELATIVE_FONT_SIZE) as u16;
             self.font_dimensions = measure_text("j", Some(self.font), self.font_size, 1.0);
 
             // Grab an updated transition screen
