@@ -114,10 +114,7 @@ impl State {
                     &self,
                     Vec2::new(self.window_width / 2.0, self.window_height / 2.0),
                 ),
-                Animation::Copter(_) => Animation::Wall(WallAnimation {
-                    y_offset: 0.0,
-                    x_offset: 0.0,
-                }),
+                Animation::Copter(_) => Animation::Wall(WallAnimation::new()),
             });
             self.animation_timer = Duration::from_secs(0);
             self.animation_duration = Duration::from_secs(gen_range(8, 15));

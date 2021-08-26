@@ -26,7 +26,8 @@ async fn main() {
         // We're cycling through animations, only one can run at a time.
         match animation {
             Animation::Wall(ref mut inner) => {
-                animate_wall(&state, inner);
+                inner.update(&state);
+                inner.draw(&state);
             }
             Animation::Copter(ref mut inner) => {
                 inner.update(&state);
