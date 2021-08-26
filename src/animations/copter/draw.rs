@@ -36,6 +36,7 @@ pub fn draw_raw_copter(
     copter_direction: Direction,
     rotor_direction: Direction,
 ) -> Texture2D {
+    clear_background(BLACK);
     let mut x: f32;
     let mut y: f32 = 0.0;
     let art = get_ascii_art(&rotor_direction, &copter_direction);

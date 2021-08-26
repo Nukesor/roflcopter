@@ -41,17 +41,21 @@ async fn main() {
             // Calculate the gradiant, depending on the current state of the transition and,
             // whether it's a phase in or a phase out.
             let gradiant =
-                (transition.timer.as_millis() / state.transition_duration.as_micros()) / 1000;
+                transition.timer.as_millis() as f64 / state.transition_duration.as_millis() as f64;
             let gradiant = match transition.phase {
-                state::Phase::In => 255 - 255 * gradiant as u8,
-                state::Phase::Out => 255 * gradiant as u8,
+                state::Phase::In => (255.0 - 255.0 * gradiant) as u8,
+                state::Phase::Out => (255.0 * gradiant) as u8,
             };
 
-            draw_texture(
+            draw_texture_ex(
                 state.black_screen,
                 0.0,
                 0.0,
                 Color::from_rgba(0, 0, 0, gradiant),
+                DrawTextureParams {
+                    flip_y: true,
+                    ..Default::default()
+                },
             )
         }
 

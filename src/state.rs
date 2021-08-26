@@ -13,6 +13,7 @@ pub struct Transition {
     pub phase: Phase,
 }
 
+#[derive(Debug)]
 pub enum Phase {
     In,
     Out,
@@ -51,8 +52,14 @@ impl State {
         let mut colors = color::create_colors();
         colors.truncate(word.len());
 
-        let animation_duration = Duration::from_secs(4);
+        let animation_duration = Duration::from_secs(gen_range(10, 25));
         let animation_timer = Duration::from_secs(0);
+
+        // Start the phase in transition animation
+        let transition = Some(Transition {
+            timer: Duration::from_secs(0),
+            phase: Phase::In,
+        });
 
         State {
             font,
@@ -61,7 +68,7 @@ impl State {
             animation_duration,
             animation_timer,
             transition_duration: Duration::from_secs(2),
-            transition: None,
+            transition,
             black_screen: Texture2D::empty(),
             word,
             colors,
@@ -70,8 +77,8 @@ impl State {
 
     pub fn grab_black_screen(&mut self) {
         clear_background(BLACK);
-        self.black_screen = Texture2D::empty();
-        self.black_screen.grab_screen();
+        let image = get_screen_data();
+        self.black_screen = Texture2D::from_image(&image);
     }
 
     pub fn update(&mut self, animation: &Animation) -> Option<Animation> {

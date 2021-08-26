@@ -45,12 +45,6 @@ impl CopterAnimation {
             rotor_duration: Duration::from_millis(200),
             rotor_timer: Duration::from_secs(0),
             copter_images: CopterImages::new(state),
-            //state: CopterState::Hovering {
-            //    duration: Duration::from_millis(1000),
-            //    timer: Duration::from_secs(0),
-            //    position,
-            //    copter_direction: Direction::Left,
-            //},
             state: CopterState::Flying {
                 position,
                 dest: Vec2::new(100.0, 100.0),
