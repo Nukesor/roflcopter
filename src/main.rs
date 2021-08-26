@@ -1,4 +1,3 @@
-use cgmath::Vector2;
 use macroquad::prelude::*;
 use simplelog::{Config, LevelFilter, SimpleLogger};
 
@@ -22,10 +21,8 @@ async fn main() {
         y_offset: 0.0,
         x_offset: 0.0,
     });
-    let mut animation = CopterAnimation::new(
-        &state,
-        Vector2::new(window_width / 2.0, window_height / 2.0),
-    );
+    let mut animation =
+        CopterAnimation::new(&state, Vec2::new(window_width / 2.0, window_height / 2.0));
 
     loop {
         clear_background(BLACK);
