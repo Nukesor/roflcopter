@@ -34,6 +34,13 @@ impl CopterImages {
         self.left_copter_left_rotor = draw_raw_copter(state, Direction::Left, Direction::Left);
     }
 
+    pub fn copter_dimensions(&self) -> (f32, f32) {
+        (
+            self.right_copter_left_rotor.width(),
+            self.right_copter_left_rotor.height(),
+        )
+    }
+
     /// Simple helper, which gets the correct texture for a copter and rotor orientation.
     pub fn get_for_directions(
         &self,

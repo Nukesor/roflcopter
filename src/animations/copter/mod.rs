@@ -250,8 +250,15 @@ impl CopterAnimation {
 
                 let distance = dest - position.clone();
                 let angle = distance.y.atan2(distance.x);
+
+                let dimensions = self.copter_images.copter_dimensions();
+                let start_position = match direction {
+                    Direction::Left => position.add(Vec2::new(0.0, dimensions.1 / 2.0)),
+                    Direction::Right => position.add(Vec2::new(dimensions.0, dimensions.1)),
+                };
+
                 self.shots.push(Shot {
-                    position: position.clone(),
+                    position: start_position,
                     direction,
                     angle,
                 })

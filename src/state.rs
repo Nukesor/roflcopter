@@ -165,15 +165,10 @@ impl State {
                     ref position,
                     ..
                 } => {
+                    let dimensions = copter.copter_images.copter_dimensions();
                     let new_dest = match direction(position, &dest) {
-                        Direction::Left => Vec2::new(
-                            x,
-                            y - copter.copter_images.left_copter_right_rotor.height() / 2.0,
-                        ),
-                        Direction::Right => Vec2::new(
-                            x - copter.copter_images.right_copter_right_rotor.width(),
-                            y - copter.copter_images.left_copter_right_rotor.height() / 2.0,
-                        ),
+                        Direction::Left => Vec2::new(x, y - dimensions.1 / 2.0),
+                        Direction::Right => Vec2::new(x - dimensions.0, y - dimensions.1 / 2.0),
                     };
                     *dest = new_dest;
                 }
