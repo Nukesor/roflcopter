@@ -4,8 +4,9 @@ use macroquad::prelude::*;
 use macroquad::rand::gen_range;
 
 use crate::{
-    animations::{helper::delta_duration, Animation, CopterAnimation, CopterState, WallAnimation},
+    animations::{helper::delta_duration, Animation, CopterState},
     color,
+    shaders::load_shaders,
 };
 
 pub struct Transition {
@@ -43,6 +44,8 @@ pub struct State {
     pub word: String,
     /// For each character of the word, a color will be assigned.
     pub colors: Vec<Color>,
+
+    pub shaders: Vec<Material>,
 }
 
 impl State {
@@ -81,6 +84,7 @@ impl State {
             window_width: screen_width(),
             word,
             colors,
+            shaders: load_shaders(),
         }
     }
 
@@ -114,11 +118,11 @@ impl State {
         // The current transition has finished and the transition animation is done.
         if self.animation_timer > self.animation_duration.add(self.transition_duration * 2) {
             next_animation = Some(match animation {
-                Animation::Wall(_) => CopterAnimation::new(
+                Animation::Wall(_) => Animation::new_copter(
                     &self,
                     Vec2::new(self.window_width / 2.0, self.window_height / 2.0),
                 ),
-                Animation::Copter(_) => Animation::Wall(WallAnimation::new()),
+                Animation::Copter(_) => Animation::new_wall(),
             });
             self.animation_timer = Duration::from_secs(0);
             self.animation_duration = Duration::from_secs(gen_range(8, 15));
@@ -140,7 +144,6 @@ impl State {
             return;
         }
 
-        println!("mouse pos: {:?}", (x, y));
         self.mouse_position = (x, y);
 
         match animation {

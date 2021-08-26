@@ -11,7 +11,6 @@ mod images;
 
 use self::draw::draw_copter;
 pub use self::images::CopterImages;
-use super::Animation;
 use crate::animations::helper::{delta_duration, Direction};
 use crate::state::State;
 
@@ -39,17 +38,18 @@ pub struct CopterAnimation {
 }
 
 impl CopterAnimation {
-    pub fn new(state: &State, position: Vec2) -> Animation {
-        Animation::Copter(CopterAnimation {
+    pub fn new(state: &State, position: Vec2) -> CopterAnimation {
+        let copter_state = CopterState::Flying {
+            position,
+            dest: Vec2::new(100.0, 100.0),
+        };
+        CopterAnimation {
             rotor_direction: Direction::Left,
             rotor_duration: Duration::from_millis(200),
             rotor_timer: Duration::from_secs(0),
             copter_images: CopterImages::new(state),
-            copter_state: CopterState::Flying {
-                position,
-                dest: Vec2::new(100.0, 100.0),
-            },
-        })
+            copter_state,
+        }
     }
 
     pub fn update(&mut self, state: &State) {

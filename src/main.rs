@@ -3,6 +3,7 @@ use simplelog::{Config, LevelFilter, SimpleLogger};
 
 mod animations;
 mod color;
+mod shaders;
 mod state;
 
 use crate::animations::*;
@@ -14,11 +15,8 @@ async fn main() {
     let mut state = State::new().await;
     state.grab_black_screen();
 
-    let window_height = screen_height();
-    let window_width = screen_width();
-
-    let mut animation =
-        CopterAnimation::new(&state, Vec2::new(window_width / 2.0, window_height / 2.0));
+    let mut animation = Animation::new_wall();
+    //Animation::new_copter(&state, Vec2::new(state.window_width / 2.0, state.window_height / 2.0));
 
     loop {
         println!("FPS: {}", get_fps());

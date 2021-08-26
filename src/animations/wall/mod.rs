@@ -4,6 +4,8 @@ use macroquad::prelude::*;
 
 use crate::state::State;
 
+mod shader;
+
 #[derive(Debug, Clone)]
 pub struct WallAnimation {
     pub y_offset: f32,
@@ -67,6 +69,8 @@ impl WallAnimation {
             line += 1;
             used_height += state.font_dimensions.height;
         }
+
+        shader::draw_shader(state);
     }
 
     /// Draw one single line.
