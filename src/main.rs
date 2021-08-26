@@ -29,7 +29,8 @@ async fn main() {
                 animate_wall(&state, inner);
             }
             Animation::Copter(ref mut inner) => {
-                animate_copter(&state, inner);
+                inner.update(&state);
+                inner.draw(&state);
             }
         }
 
