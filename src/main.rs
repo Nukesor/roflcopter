@@ -11,8 +11,8 @@ use crate::state::State;
 #[macroquad::main("Text")]
 async fn main() {
     setup();
-
     let mut state = State::new().await;
+    state.grab_black_screen();
 
     let window_height = screen_height();
     let window_width = screen_width();
@@ -35,6 +35,24 @@ async fn main() {
 
         if let Some(next_animation) = state.update(&animation) {
             animation = next_animation;
+        }
+
+        if let Some(ref transition) = state.transition {
+            // Calculate the gradiant, depending on the current state of the transition and,
+            // whether it's a phase in or a phase out.
+            let gradiant =
+                (transition.timer.as_millis() / state.transition_duration.as_micros()) / 1000;
+            let gradiant = match transition.phase {
+                state::Phase::In => 255 - 255 * gradiant as u8,
+                state::Phase::Out => 255 * gradiant as u8,
+            };
+
+            draw_texture(
+                state.black_screen,
+                0.0,
+                0.0,
+                Color::from_rgba(0, 0, 0, gradiant),
+            )
         }
 
         next_frame().await

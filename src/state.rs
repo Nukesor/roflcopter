@@ -8,14 +8,31 @@ use crate::{
     color,
 };
 
+pub struct Transition {
+    pub timer: Duration,
+    pub phase: Phase,
+}
+
+pub enum Phase {
+    In,
+    Out,
+}
+
 pub struct State {
     pub font: Font,
     pub font_size: u16,
     pub font_dimensions: TextDimensions,
 
-    // The total time of the duration and current animation length.
+    /// The total time of the duration and current animation length.
     pub animation_duration: Duration,
     pub animation_timer: Duration,
+
+    /// How long a transition should take
+    pub transition_duration: Duration,
+    /// The current state of the transition, if one is active
+    pub transition: Option<Transition>,
+    /// A black screen, which is used to simulate transitions between animations.
+    pub black_screen: Texture2D,
 
     pub word: String,
     /// For each character of the word, a color will be assigned.
@@ -34,7 +51,7 @@ impl State {
         let mut colors = color::create_colors();
         colors.truncate(word.len());
 
-        let animation_duration = Duration::from_secs(10);
+        let animation_duration = Duration::from_secs(4);
         let animation_timer = Duration::from_secs(0);
 
         State {
@@ -43,21 +60,47 @@ impl State {
             font_dimensions,
             animation_duration,
             animation_timer,
+            transition_duration: Duration::from_secs(2),
+            transition: None,
+            black_screen: Texture2D::empty(),
             word,
             colors,
         }
     }
 
+    pub fn grab_black_screen(&mut self) {
+        clear_background(BLACK);
+        self.black_screen = Texture2D::empty();
+        self.black_screen.grab_screen();
+    }
+
     pub fn update(&mut self, animation: &Animation) -> Option<Animation> {
+        let mut next_animation: Option<Animation> = None;
         let window_height = screen_height();
         let window_width = screen_width();
+        let delta_time = delta_duration();
 
         // Tick the timer for the current animation.
-        self.animation_timer = self.animation_timer.add(delta_duration());
+        self.animation_timer = self.animation_timer.add(delta_time);
 
-        // The current animation finished, start the next one.
-        let mut next_animation: Option<Animation> = None;
-        if self.animation_timer > self.animation_duration {
+        // There's currently a transition running. Tick it
+        if let Some(ref mut transition) = self.transition {
+            if transition.timer > self.transition_duration {
+                self.transition = None;
+            } else {
+                transition.timer = transition.timer.add(delta_time);
+            }
+        } else if self.animation_timer > self.animation_duration.add(self.transition_duration) {
+            // There's no transition, check if we should start one.
+            // This should be done, if the animation is finished.
+            self.transition = Some(Transition {
+                timer: Duration::from_secs(0),
+                phase: Phase::Out,
+            })
+        }
+
+        // The current transition has finished and the transition animation is done.
+        if self.animation_timer > self.animation_duration.add(self.transition_duration * 2) {
             next_animation = Some(match animation {
                 Animation::Wall(_) => {
                     CopterAnimation::new(&self, Vec2::new(window_width / 2.0, window_height / 2.0))
@@ -69,6 +112,12 @@ impl State {
             });
             self.animation_timer = Duration::from_secs(0);
             self.animation_duration = Duration::from_secs(gen_range(8, 15));
+
+            // Start the phase in transition animation
+            self.transition = Some(Transition {
+                timer: Duration::from_secs(0),
+                phase: Phase::In,
+            })
         }
 
         next_animation
