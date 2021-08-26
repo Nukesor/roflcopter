@@ -103,15 +103,20 @@ impl CopterAnimation {
                 ref position,
                 ..
             } => {
+                // We're done with hovering, pick a random position on the screen.
+                // We only pick positions, where the copter can be fully seen.
                 if *timer > *duration {
                     let height = state.window_height;
                     let width = state.window_width;
 
+                    let image_height = self.copter_images.right_copter_right_rotor.height();
+                    let image_width = self.copter_images.right_copter_right_rotor.width();
+
                     next_state = Some(CopterState::Flying {
                         position: position.clone(),
                         dest: Vec2::new(
-                            gen_range(0.0 + width / 20.0, width - width / 20.0),
-                            gen_range(0.0 + height / 20.0, height - height / 20.0),
+                            gen_range(0.0, width - image_width),
+                            gen_range(0.0, height - image_height),
                         ),
                     });
                 }
