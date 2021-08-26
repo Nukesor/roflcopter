@@ -1,6 +1,6 @@
 use macroquad::prelude::Texture2D;
 
-use super::raw_draw::draw_raw_copter;
+use super::draw::draw_raw_copter;
 use crate::{animations::helper::Direction, state::State};
 
 /// A struct used to store dynamically generated images of the roflcopter.
