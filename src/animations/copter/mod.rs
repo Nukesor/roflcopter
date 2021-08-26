@@ -14,6 +14,8 @@ pub use self::images::CopterImages;
 use crate::animations::helper::{delta_duration, Direction};
 use crate::state::State;
 
+use super::helper::direction;
+
 #[derive(Debug, Clone)]
 pub enum CopterState {
     Flying {
@@ -91,7 +93,7 @@ impl CopterAnimation {
                 ref dest,
             } => {
                 // Check, whether we reached our position
-                if dest.sub(position.clone()).length() < 5.0 {
+                if dest.sub(position.clone()).length() < 20.0 {
                     let copter_direction = if position.x > dest.x {
                         Direction::Left
                     } else {
@@ -159,11 +161,7 @@ impl CopterAnimation {
                 ref mut position,
                 ref dest,
             } => {
-                let copter_direction = if position.x > dest.x {
-                    Direction::Left
-                } else {
-                    Direction::Right
-                };
+                let copter_direction = direction(position, dest);
 
                 let angle = match copter_direction {
                     Direction::Left => -PI as f32 / 8.0,
@@ -248,11 +246,7 @@ impl CopterAnimation {
     pub fn fire_shot(&mut self, dest: Vec2) {
         match self.copter_state {
             CopterState::Flying { ref position, .. } => {
-                let direction = if position.x > dest.x {
-                    Direction::Left
-                } else {
-                    Direction::Right
-                };
+                let direction = direction(position, &dest);
 
                 let distance = dest - position.clone();
                 let angle = distance.y.atan2(distance.x);

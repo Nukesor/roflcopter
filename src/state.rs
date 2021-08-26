@@ -4,7 +4,10 @@ use macroquad::prelude::*;
 use macroquad::rand::gen_range;
 
 use crate::{
-    animations::{helper::delta_duration, Animation, CopterState},
+    animations::{
+        helper::{delta_duration, direction, Direction},
+        Animation, CopterState,
+    },
     color,
     shaders::load_shaders,
 };
@@ -157,8 +160,22 @@ impl State {
                         dest: Vec2::new(x, y),
                     };
                 }
-                CopterState::Flying { ref mut dest, .. } => {
-                    *dest = Vec2::new(x, y);
+                CopterState::Flying {
+                    ref mut dest,
+                    ref position,
+                    ..
+                } => {
+                    let new_dest = match direction(position, &dest) {
+                        Direction::Left => Vec2::new(
+                            x,
+                            y - copter.copter_images.left_copter_right_rotor.height() / 2.0,
+                        ),
+                        Direction::Right => Vec2::new(
+                            x - copter.copter_images.right_copter_right_rotor.width(),
+                            y - copter.copter_images.left_copter_right_rotor.height() / 2.0,
+                        ),
+                    };
+                    *dest = new_dest;
                 }
             },
             _ => {}
