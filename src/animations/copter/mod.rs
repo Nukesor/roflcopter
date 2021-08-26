@@ -9,7 +9,7 @@ use macroquad::{prelude::*, rand::gen_range};
 mod draw;
 mod images;
 
-use self::draw::draw_copter;
+use self::draw::{draw_copter, draw_shot};
 pub use self::images::CopterImages;
 use crate::animations::helper::{delta_duration, Direction};
 use crate::state::State;
@@ -29,12 +29,24 @@ pub enum CopterState {
 }
 
 #[derive(Debug, Clone)]
+pub struct Shot {
+    position: Vec2,
+    direction: Direction,
+    angle: f32,
+}
+
+#[derive(Debug, Clone)]
 pub struct CopterAnimation {
     pub rotor_direction: Direction,
     pub rotor_duration: Duration,
     pub rotor_timer: Duration,
+
     pub copter_images: CopterImages,
     pub copter_state: CopterState,
+
+    pub shot_timeout: Duration,
+    pub shot_timer: Duration,
+    shots: Vec<Shot>,
 }
 
 impl CopterAnimation {
@@ -47,8 +59,13 @@ impl CopterAnimation {
             rotor_direction: Direction::Left,
             rotor_duration: Duration::from_millis(200),
             rotor_timer: Duration::from_secs(0),
+
             copter_images: CopterImages::new(state),
             copter_state,
+
+            shot_timeout: Duration::from_millis(150),
+            shot_timer: Duration::from_secs(0),
+            shots: vec![],
         }
     }
 
@@ -63,6 +80,8 @@ impl CopterAnimation {
             }
             self.rotor_timer = Duration::from_secs(0);
         }
+
+        self.handle_shots(state);
 
         let mut next_state: Option<CopterState> = None;
         // Update state dependant variables.
@@ -131,6 +150,10 @@ impl CopterAnimation {
 
     /// Draw the copter depending on the current animation state.
     pub fn draw(&mut self, state: &State) {
+        for shot in self.shots.iter() {
+            draw_shot(&self.copter_images, shot);
+        }
+
         match self.copter_state {
             CopterState::Flying {
                 ref mut position,
@@ -178,6 +201,78 @@ impl CopterAnimation {
                     y,
                     0.0,
                 );
+            }
+        }
+    }
+
+    /// Tick all shots and spawn new ones, if the mouse is down.
+    pub fn handle_shots(&mut self, state: &State) {
+        // Animate the shots
+        let mut to_remove = vec![];
+        for (index, shot) in self.shots.iter_mut().enumerate() {
+            let speed = state.window_width / 60.0;
+
+            let direction = Vec2::new(shot.angle.cos(), shot.angle.sin());
+            let distance = direction * speed;
+
+            shot.position = shot.position + distance;
+
+            let text_width = self.copter_images.shot.width();
+            if shot.position.x > state.window_width
+                || shot.position.x < 0.0 - text_width
+                || shot.position.y > state.window_height + text_width
+                || shot.position.y < 0.0 - text_width
+            {
+                to_remove.push(index);
+            }
+        }
+        to_remove.reverse();
+        for index in to_remove {
+            self.shots.remove(index);
+        }
+
+        // Check if we want to spawn new shots.
+        if is_mouse_button_down(MouseButton::Left) {
+            if self.shot_timer.as_micros() == 0 {
+                self.fire_shot(Vec2::new(state.mouse_position.0, state.mouse_position.1))
+            }
+
+            self.shot_timer = self.shot_timer.checked_add(delta_duration()).unwrap();
+            if self.shot_timer > self.shot_timeout {
+                self.shot_timer = Duration::from_secs(0);
+            }
+        }
+    }
+
+    /// Spawn a new shot depending on the current position and copter state.
+    pub fn fire_shot(&mut self, dest: Vec2) {
+        match self.copter_state {
+            CopterState::Flying { ref position, .. } => {
+                let direction = if position.x > dest.x {
+                    Direction::Left
+                } else {
+                    Direction::Right
+                };
+
+                let distance = dest - position.clone();
+                let angle = distance.y.atan2(distance.x);
+                self.shots.push(Shot {
+                    position: position.clone(),
+                    direction,
+                    angle,
+                })
+            }
+            CopterState::Hovering {
+                ref position,
+                ref copter_direction,
+                ..
+            } => {
+                let angle = position.angle_between(dest);
+                self.shots.push(Shot {
+                    position: position.clone(),
+                    direction: copter_direction.clone(),
+                    angle,
+                })
             }
         }
     }

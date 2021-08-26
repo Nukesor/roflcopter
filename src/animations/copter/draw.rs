@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use super::CopterImages;
+use super::{CopterImages, Shot};
 use crate::{animations::helper::Direction, state::State};
 
 /// Lower level helicopter drawing call.
@@ -137,4 +137,62 @@ ROFL:ROFL:
                 .to_string(),
         },
     }
+}
+
+/// Lower level helicopter drawing call.
+/// This is a simple wrapper around some of macroquads drawing logic.
+pub fn draw_shot(images: &CopterImages, shot: &Shot) {
+    let flip_x = match shot.direction {
+        Direction::Left => true,
+        Direction::Right => false,
+    };
+
+    draw_texture_ex(
+        images.shot,
+        shot.position.x,
+        shot.position.y,
+        Color::from_rgba(255, 255, 255, 255),
+        DrawTextureParams {
+            rotation: shot.angle,
+            flip_y: true,
+            flip_x,
+            ..Default::default()
+        },
+    )
+}
+
+pub fn draw_raw_shot(state: &State) -> Texture2D {
+    clear_background(BLACK);
+
+    let mut x = 0.0;
+    for (index, character) in state.word.chars().enumerate() {
+        draw_text_ex(
+            &character.to_string(),
+            x,
+            state.font_dimensions.height,
+            TextParams {
+                font: state.font,
+                font_size: state.font_size,
+                font_scale: 1.0,
+                color: state.colors[index],
+                ..Default::default()
+            },
+        );
+        x += state.font_dimensions.width;
+    }
+
+    // Make a screenshot and extract the roflcopter from it.
+    let image = get_screen_data();
+    let image = image.sub_image(Rect {
+        x: 0.0,
+        y: image.height as f32
+            - state.font_dimensions.height
+            - state.font_dimensions.offset_y / 2.0,
+        w: x,
+        h: state.font_dimensions.height + state.font_dimensions.offset_y / 2.0,
+    });
+    image.export_png("/home/nuke/roflcopter.png");
+
+    clear_background(BLACK);
+    Texture2D::from_image(&image)
 }

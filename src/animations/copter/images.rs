@@ -1,6 +1,6 @@
 use macroquad::prelude::Texture2D;
 
-use super::draw::draw_raw_copter;
+use super::draw::{draw_raw_copter, draw_raw_shot};
 use crate::{animations::helper::Direction, state::State};
 
 /// A struct used to store dynamically generated images of the roflcopter.
@@ -10,6 +10,7 @@ pub struct CopterImages {
     pub right_copter_left_rotor: Texture2D,
     pub left_copter_right_rotor: Texture2D,
     pub left_copter_left_rotor: Texture2D,
+    pub shot: Texture2D,
 }
 
 impl CopterImages {
@@ -19,6 +20,7 @@ impl CopterImages {
             right_copter_left_rotor: draw_raw_copter(state, Direction::Right, Direction::Left),
             left_copter_right_rotor: draw_raw_copter(state, Direction::Left, Direction::Right),
             left_copter_left_rotor: draw_raw_copter(state, Direction::Left, Direction::Left),
+            shot: draw_raw_shot(state),
         }
     }
 

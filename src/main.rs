@@ -15,11 +15,14 @@ async fn main() {
     let mut state = State::new().await;
     state.grab_black_screen();
 
-    let mut animation = Animation::new_wall();
-    //Animation::new_copter(&state, Vec2::new(state.window_width / 2.0, state.window_height / 2.0));
+    //let mut animation = Animation::new_wall();
+    let mut animation = Animation::new_copter(
+        &state,
+        Vec2::new(state.window_width / 2.0, state.window_height / 2.0),
+    );
 
     loop {
-        println!("FPS: {}", get_fps());
+        //println!("FPS: {}", get_fps());
         clear_background(BLACK);
 
         // We're cycling through animations, only one can run at a time.
