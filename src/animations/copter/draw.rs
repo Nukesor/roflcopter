@@ -191,7 +191,6 @@ pub fn draw_raw_shot(state: &State) -> Texture2D {
         w: x,
         h: state.font_dimensions.height + state.font_dimensions.offset_y / 2.0,
     });
-    image.export_png("/home/nuke/roflcopter.png");
 
     clear_background(BLACK);
     Texture2D::from_image(&image)

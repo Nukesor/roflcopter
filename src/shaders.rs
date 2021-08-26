@@ -24,8 +24,8 @@ varying vec2 center;
 uniform sampler2D _ScreenTexture;
 
 void main() {
-    float gradient = length(uv) * 2.0;
-    vec2 uv_zoom = (uv_screen - center) * gradient * vec2(0.5, 0.5) + center;
+    float gradient = length(uv);
+    vec2 uv_zoom = (uv_screen - center) * gradient + center;
 
     gl_FragColor = texture2D(_ScreenTexture, uv_zoom);
 }
@@ -48,8 +48,8 @@ void main() {
     vec4 res = Projection * Model * vec4(position, 1);
     vec4 c = Projection * Model * vec4(Center, 0, 1);
 
-    uv_screen = res.xy / 1.5;
-    center = c.xy / 2.0 + vec2(0.5, 1.5);
+    uv_screen = res.xy / 2.0 + vec2(0.5, 0.5);
+    center = c.xy / 2.0 + vec2(0.5, 0.5);
     uv = texcoord;
 
     gl_Position = res;

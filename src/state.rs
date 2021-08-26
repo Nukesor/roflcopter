@@ -21,9 +21,12 @@ pub enum Phase {
 }
 
 pub struct State {
+    pub word: String,
     pub font: Font,
     pub font_size: u16,
     pub font_dimensions: TextDimensions,
+    /// For each character of the word, a color will be assigned.
+    pub colors: Vec<Color>,
 
     /// The total time of the duration and current animation length.
     pub animation_duration: Duration,
@@ -38,22 +41,19 @@ pub struct State {
 
     pub window_height: f32,
     pub window_width: f32,
-
     pub mouse_position: (f32, f32),
-
-    pub word: String,
-    /// For each character of the word, a color will be assigned.
-    pub colors: Vec<Color>,
-
     pub shaders: Vec<Material>,
 }
 
 impl State {
     pub async fn new() -> Self {
+        let window_height = screen_height();
+        let window_width = screen_width();
+
         let font = load_ttf_font("fonts/RobotoMono-SemiBold.ttf")
             .await
             .expect("Font couldn't be loaded");
-        let font_size = 30;
+        let font_size = (window_height / 50.0) as u16;
         let font_dimensions = measure_text("j", Some(font), font_size, 1.0);
 
         let word = "ROFLCOPTER".to_string();
@@ -70,20 +70,22 @@ impl State {
         });
 
         State {
+            word,
             font,
             font_size,
             font_dimensions,
+            colors,
+
             animation_duration,
+
             animation_timer,
             transition_duration: Duration::from_secs(2),
             transition,
             black_screen: Texture2D::empty(),
-            mouse_position: mouse_position(),
 
-            window_height: screen_height(),
-            window_width: screen_width(),
-            word,
-            colors,
+            window_height,
+            window_width,
+            mouse_position: mouse_position(),
             shaders: load_shaders(),
         }
     }
@@ -173,6 +175,9 @@ impl State {
         if height != self.window_height || width != self.window_width {
             self.window_height = height;
             self.window_width = width;
+
+            self.font_size = (self.window_height / 50.0) as u16;
+            self.font_dimensions = measure_text("j", Some(self.font), self.font_size, 1.0);
 
             // Grab an updated transition screen
             self.grab_black_screen();
