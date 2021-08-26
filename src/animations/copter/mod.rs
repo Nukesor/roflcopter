@@ -3,9 +3,10 @@ use std::{f32::consts::PI, time::Duration};
 use cgmath::Vector2;
 use macroquad::prelude::*;
 
+mod images;
 mod raw_draw;
 
-use self::raw_draw::draw_raw_copter;
+pub use self::images::CopterImages;
 use super::{helper::delta_duration, CopterAnimation, Direction};
 use crate::state::State;
 
@@ -23,50 +24,19 @@ pub enum CopterState {
     },
 }
 
-/// A struct used to store dynamically generated images of the roflcopter.
-#[derive(Debug, Clone)]
-pub struct CopterImages {
-    pub right_copter_right_rotor: Texture2D,
-    pub right_copter_left_rotor: Texture2D,
-    pub left_copter_right_rotor: Texture2D,
-    pub left_copter_left_rotor: Texture2D,
+pub fn animate_copter(state: &State, animation: &mut CopterAnimation) {
+    animation.rotor_timer = animation.rotor_timer.checked_add(delta_duration()).unwrap();
+    if animation.rotor_timer > animation.rotor_duration {
+        match animation.rotor_direction {
+            Direction::Left => animation.rotor_direction = Direction::Right,
+            Direction::Right => animation.rotor_direction = Direction::Left,
+        }
+        animation.rotor_timer = Duration::from_secs(0)
+    }
+    draw(state, animation);
 }
 
-impl CopterImages {
-    pub fn new(state: &State) -> CopterImages {
-        CopterImages {
-            right_copter_right_rotor: draw_raw_copter(state, Direction::Right, Direction::Right),
-            right_copter_left_rotor: draw_raw_copter(state, Direction::Right, Direction::Left),
-            left_copter_right_rotor: draw_raw_copter(state, Direction::Left, Direction::Right),
-            left_copter_left_rotor: draw_raw_copter(state, Direction::Left, Direction::Left),
-        }
-    }
-
-    pub fn update(&mut self, state: &State) {
-        self.right_copter_right_rotor = draw_raw_copter(state, Direction::Right, Direction::Right);
-        self.right_copter_left_rotor = draw_raw_copter(state, Direction::Right, Direction::Left);
-        self.left_copter_right_rotor = draw_raw_copter(state, Direction::Left, Direction::Right);
-        self.left_copter_left_rotor = draw_raw_copter(state, Direction::Left, Direction::Left);
-    }
-
-    pub fn get_for_directions(
-        &self,
-        copter_direction: &Direction,
-        rotor_direction: &Direction,
-    ) -> Texture2D {
-        match copter_direction {
-            Direction::Right => match rotor_direction {
-                Direction::Right => self.right_copter_right_rotor.clone(),
-                Direction::Left => self.right_copter_left_rotor.clone(),
-            },
-            Direction::Left => match rotor_direction {
-                Direction::Right => self.left_copter_right_rotor.clone(),
-                Direction::Left => self.left_copter_left_rotor.clone(),
-            },
-        }
-    }
-}
-
+/// Draw the copter depending on the current animation state.
 fn draw(state: &State, animation: &mut CopterAnimation) {
     match animation.state {
         CopterState::Flying {
@@ -111,6 +81,8 @@ fn draw(state: &State, animation: &mut CopterAnimation) {
     }
 }
 
+/// Lower level helicopter drawing call.
+/// This is a simple wrapper around some of macroquads drawing logic.
 fn draw_copter(
     images: &CopterImages,
     x: f32,
@@ -130,16 +102,4 @@ fn draw_copter(
             ..Default::default()
         },
     )
-}
-
-pub fn animate_copter(state: &State, animation: &mut CopterAnimation) {
-    animation.rotor_timer = animation.rotor_timer.checked_add(delta_duration()).unwrap();
-    if animation.rotor_timer > animation.rotor_duration {
-        match animation.rotor_direction {
-            Direction::Left => animation.rotor_direction = Direction::Right,
-            Direction::Right => animation.rotor_direction = Direction::Left,
-        }
-        animation.rotor_timer = Duration::from_secs(0)
-    }
-    draw(state, animation);
 }

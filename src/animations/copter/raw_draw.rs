@@ -51,6 +51,7 @@ pub fn draw_raw_copter(
             max_y = y;
         }
     }
+
     // Make a screenshot and extract the roflcopter from it.
     let image = get_screen_data();
     let image = image.sub_image(Rect {
@@ -66,6 +67,7 @@ pub fn draw_raw_copter(
     Texture2D::from_image(&image)
 }
 
+/// Get the correct ascii art, depending on the copter direction and rotor orientation.
 fn get_ascii_art(rotor_direction: &Direction, copter_direction: &Direction) -> String {
     match copter_direction {
         Direction::Right => match rotor_direction {
@@ -102,7 +104,7 @@ ROFL:ROFL:
          :LFOR:LFOR
     _ ___^___
    / []      \\__   L L
-  /           __=== O 
+  /           __=== O
  [___ ___ ___/     L L
       I   I
  \\----------          "
