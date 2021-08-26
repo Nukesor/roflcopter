@@ -12,21 +12,18 @@ use crate::state::State;
 async fn main() {
     setup();
 
-    let state = State::new().await;
+    let mut state = State::new().await;
 
     let window_height = screen_height();
     let window_width = screen_width();
 
-    let mut _animation = Animation::Wall(WallAnimation {
-        y_offset: 0.0,
-        x_offset: 0.0,
-    });
     let mut animation =
         CopterAnimation::new(&state, Vec2::new(window_width / 2.0, window_height / 2.0));
 
     loop {
         clear_background(BLACK);
 
+        // We're cycling through animations, only one can run at a time.
         match animation {
             Animation::Wall(ref mut inner) => {
                 animate_wall(&state, inner);
@@ -34,6 +31,10 @@ async fn main() {
             Animation::Copter(ref mut inner) => {
                 animate_copter(&state, inner);
             }
+        }
+
+        if let Some(next_animation) = state.update(&animation) {
+            animation = next_animation;
         }
 
         next_frame().await

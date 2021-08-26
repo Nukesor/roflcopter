@@ -1,8 +1,12 @@
-use std::time::Duration;
+use std::{ops::Add, time::Duration};
 
 use macroquad::prelude::*;
+use macroquad::rand::gen_range;
 
-use crate::color;
+use crate::{
+    animations::{helper::delta_duration, Animation, CopterAnimation, WallAnimation},
+    color,
+};
 
 pub struct State {
     pub font: Font,
@@ -10,7 +14,7 @@ pub struct State {
     pub font_dimensions: TextDimensions,
 
     // The total time of the duration and current animation length.
-    pub animation_length: Duration,
+    pub animation_duration: Duration,
     pub animation_timer: Duration,
 
     pub word: String,
@@ -30,17 +34,43 @@ impl State {
         let mut colors = color::create_colors();
         colors.truncate(word.len());
 
-        let animation_length = Duration::from_secs(10);
+        let animation_duration = Duration::from_secs(10);
         let animation_timer = Duration::from_secs(0);
 
         State {
             font,
             font_size,
             font_dimensions,
-            animation_length,
+            animation_duration,
             animation_timer,
             word,
             colors,
         }
+    }
+
+    pub fn update(&mut self, animation: &Animation) -> Option<Animation> {
+        let window_height = screen_height();
+        let window_width = screen_width();
+
+        // Tick the timer for the current animation.
+        self.animation_timer = self.animation_timer.add(delta_duration());
+
+        // The current animation finished, start the next one.
+        let mut next_animation: Option<Animation> = None;
+        if self.animation_timer > self.animation_duration {
+            next_animation = Some(match animation {
+                Animation::Wall(_) => {
+                    CopterAnimation::new(&self, Vec2::new(window_width / 2.0, window_height / 2.0))
+                }
+                Animation::Copter(_) => Animation::Wall(WallAnimation {
+                    y_offset: 0.0,
+                    x_offset: 0.0,
+                }),
+            });
+            self.animation_timer = Duration::from_secs(0);
+            self.animation_duration = Duration::from_secs(gen_range(8, 15));
+        }
+
+        next_animation
     }
 }

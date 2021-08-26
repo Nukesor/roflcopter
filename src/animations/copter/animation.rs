@@ -116,8 +116,8 @@ impl CopterAnimation {
                     next_state = Some(CopterState::Flying {
                         position: position.clone(),
                         dest: Vec2::new(
-                            gen_range(0.0, width - width / 20.0),
-                            gen_range(0.0, height - height / 20.0),
+                            gen_range(0.0 + width / 20.0, width - width / 20.0),
+                            gen_range(0.0 + height / 20.0, height - height / 20.0),
                         ),
                     });
                 }
