@@ -66,7 +66,8 @@ impl State {
         let mut colors = color::create_colors();
         colors.truncate(word.len());
 
-        let animation_duration = Duration::from_secs(gen_range(10, 25));
+        //let animation_duration = Duration::from_secs(gen_range(10, 25));
+        let animation_duration = Duration::from_secs(120);
         let animation_timer = Duration::from_secs(0);
 
         // Start the phase in transition animation
@@ -127,10 +128,11 @@ impl State {
         if self.animation_timer > self.animation_duration.add(self.transition_duration * 2) {
             next_animation = Some(match animation {
                 Animation::Wall(_) => Animation::new_copter(
-                    &self,
+                    self,
                     Vec2::new(self.window_width / 2.0, self.window_height / 2.0),
                 ),
-                Animation::Copter(_) => Animation::new_wall(),
+                Animation::Copter(_) => Animation::new_word_chaos(self),
+                Animation::WordChaos(_) => Animation::new_wall(),
             });
             self.animation_timer = Duration::from_secs(0);
             self.animation_duration = Duration::from_secs(gen_range(8, 15));
@@ -200,6 +202,7 @@ impl State {
             match animation {
                 Animation::Wall(_) => {}
                 Animation::Copter(inner) => inner.copter_images.update(self),
+                Animation::WordChaos(_) => {}
             }
         }
     }

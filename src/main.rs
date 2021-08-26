@@ -16,10 +16,11 @@ async fn main() {
     state.grab_black_screen();
 
     //let mut animation = Animation::new_wall();
-    let mut animation = Animation::new_copter(
-        &state,
-        Vec2::new(state.window_width / 2.0, state.window_height / 2.0),
-    );
+    //let mut animation = Animation::new_copter(
+    //    &state,
+    //    Vec2::new(state.window_width / 2.0, state.window_height / 2.0),
+    //);
+    let mut animation = Animation::new_word_chaos(&state);
 
     loop {
         //println!("FPS: {}", get_fps());
@@ -32,6 +33,10 @@ async fn main() {
                 inner.draw(&state);
             }
             Animation::Copter(ref mut inner) => {
+                inner.update(&state);
+                inner.draw(&state);
+            }
+            Animation::WordChaos(ref mut inner) => {
                 inner.update(&state);
                 inner.draw(&state);
             }
