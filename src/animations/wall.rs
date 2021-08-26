@@ -6,16 +6,13 @@ use super::WallAnimation;
 use crate::state::State;
 
 pub fn animate_wall(state: &State, animation: &mut WallAnimation) {
-    let window_height = screen_height();
-    let window_width = screen_width();
-
     // This is used to simulate a constant upflow/downfloat simulation
-    let mut line = calculate_offsets(&state, animation, window_width);
+    let mut line = calculate_offsets(&state, animation);
 
     // We start at -100, as lines can shift upwards slowly
     let mut used_height = -100.0;
-    while (window_height + 100.0) > used_height {
-        draw_line(&state, animation, used_height, line, window_width);
+    while (state.window_height + 100.0) > used_height {
+        draw_line(&state, animation, used_height, line, state.window_width);
         line += 1;
         used_height += state.font_dimensions.height;
     }
@@ -25,7 +22,7 @@ pub fn animate_wall(state: &State, animation: &mut WallAnimation) {
 ///
 /// This function is responsible for the actual animation, by determining and updating the offset
 /// to the original start position.
-fn calculate_offsets(state: &State, animation: &mut WallAnimation, window_width: f32) -> usize {
+fn calculate_offsets(state: &State, animation: &mut WallAnimation) -> usize {
     let start = SystemTime::now();
     let time = start.duration_since(UNIX_EPOCH).unwrap().as_millis() as f64;
 
@@ -49,10 +46,10 @@ fn calculate_offsets(state: &State, animation: &mut WallAnimation, window_width:
     animation.x_offset = animation.x_offset + moved_amount;
 
     // Prevent floating too far away, due to floating point imprecision
-    if animation.x_offset < -window_width / 2.0 {
-        animation.x_offset = -window_width / 2.0;
-    } else if animation.x_offset > window_width / 2.0 {
-        animation.x_offset = window_width / 2.0;
+    if animation.x_offset < -state.window_width / 2.0 {
+        animation.x_offset = -state.window_width / 2.0;
+    } else if animation.x_offset > state.window_width / 2.0 {
+        animation.x_offset = state.window_width / 2.0;
     }
 
     let line = animation.y_offset / state.font_dimensions.height;

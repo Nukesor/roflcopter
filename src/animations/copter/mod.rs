@@ -7,6 +7,6 @@ pub use self::images::CopterImages;
 use crate::state::State;
 
 pub fn animate_copter(state: &State, animation: &mut CopterAnimation) {
-    animation.update();
+    animation.update(state);
     animation.draw(state);
 }

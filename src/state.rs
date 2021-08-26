@@ -35,6 +35,9 @@ pub struct State {
     /// A black screen, which is used to simulate transitions between animations.
     pub black_screen: Texture2D,
 
+    pub window_height: f32,
+    pub window_width: f32,
+
     pub word: String,
     /// For each character of the word, a color will be assigned.
     pub colors: Vec<Color>,
@@ -70,21 +73,19 @@ impl State {
             transition_duration: Duration::from_secs(2),
             transition,
             black_screen: Texture2D::empty(),
+
+            window_height: screen_height(),
+            window_width: screen_width(),
             word,
             colors,
         }
     }
 
-    pub fn grab_black_screen(&mut self) {
-        clear_background(BLACK);
-        let image = get_screen_data();
-        self.black_screen = Texture2D::from_image(&image);
-    }
+    pub fn update(&mut self, animation: &mut Animation) -> Option<Animation> {
+        // Check if the window has been resized and update stuff accordingly.
+        self.handle_window_resize(animation);
 
-    pub fn update(&mut self, animation: &Animation) -> Option<Animation> {
         let mut next_animation: Option<Animation> = None;
-        let window_height = screen_height();
-        let window_width = screen_width();
         let delta_time = delta_duration();
 
         // Tick the timer for the current animation.
@@ -109,9 +110,10 @@ impl State {
         // The current transition has finished and the transition animation is done.
         if self.animation_timer > self.animation_duration.add(self.transition_duration * 2) {
             next_animation = Some(match animation {
-                Animation::Wall(_) => {
-                    CopterAnimation::new(&self, Vec2::new(window_width / 2.0, window_height / 2.0))
-                }
+                Animation::Wall(_) => CopterAnimation::new(
+                    &self,
+                    Vec2::new(self.window_width / 2.0, self.window_height / 2.0),
+                ),
                 Animation::Copter(_) => Animation::Wall(WallAnimation {
                     y_offset: 0.0,
                     x_offset: 0.0,
@@ -128,5 +130,32 @@ impl State {
         }
 
         next_animation
+    }
+
+    /// Check whether the window size changed.
+    /// If that's the case, update everything, that is depending on that size.
+    pub fn handle_window_resize(&mut self, animation: &mut Animation) {
+        let height = screen_height();
+        let width = screen_width();
+
+        // The screen changed. Update stuff, that depends on the current screen resolution
+        if height != self.window_height || width != self.window_width {
+            self.window_height = height;
+            self.window_width = width;
+
+            // Grab an updated transition screen
+            self.grab_black_screen();
+
+            match animation {
+                Animation::Wall(_) => {}
+                Animation::Copter(inner) => inner.copter_images.update(self),
+            }
+        }
+    }
+
+    pub fn grab_black_screen(&mut self) {
+        clear_background(BLACK);
+        let image = get_screen_data();
+        self.black_screen = Texture2D::from_image(&image);
     }
 }

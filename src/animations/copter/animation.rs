@@ -35,7 +35,7 @@ pub struct CopterAnimation {
     pub rotor_duration: Duration,
     pub rotor_timer: Duration,
     pub copter_images: CopterImages,
-    pub state: CopterState,
+    pub copter_state: CopterState,
 }
 
 impl CopterAnimation {
@@ -45,14 +45,14 @@ impl CopterAnimation {
             rotor_duration: Duration::from_millis(200),
             rotor_timer: Duration::from_secs(0),
             copter_images: CopterImages::new(state),
-            state: CopterState::Flying {
+            copter_state: CopterState::Flying {
                 position,
                 dest: Vec2::new(100.0, 100.0),
             },
         })
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, state: &State) {
         // This is the rotor animation.
         // This animation is always active.
         self.rotor_timer = self.rotor_timer.checked_add(delta_duration()).unwrap();
@@ -66,7 +66,7 @@ impl CopterAnimation {
 
         let mut next_state: Option<CopterState> = None;
         // Update state dependant variables.
-        match self.state {
+        match self.copter_state {
             CopterState::Flying {
                 ref mut position,
                 ref dest,
@@ -87,7 +87,7 @@ impl CopterAnimation {
                     })
                 } else {
                     // The speed per second is relative to the screen width.
-                    let speed = screen_width() / 4.0;
+                    let speed = state.window_width / 4.0;
 
                     // Calculate the traveled distance for this frame
                     let direction = dest.sub(position.clone());
@@ -104,8 +104,8 @@ impl CopterAnimation {
                 ..
             } => {
                 if *timer > *duration {
-                    let height = screen_height();
-                    let width = screen_width();
+                    let height = state.window_height;
+                    let width = state.window_width;
 
                     next_state = Some(CopterState::Flying {
                         position: position.clone(),
@@ -120,13 +120,13 @@ impl CopterAnimation {
         }
 
         if let Some(next_state) = next_state {
-            self.state = next_state;
+            self.copter_state = next_state;
         }
     }
 
     /// Draw the copter depending on the current animation state.
     pub fn draw(&mut self, state: &State) {
-        match self.state {
+        match self.copter_state {
             CopterState::Flying {
                 ref mut position,
                 ref dest,

@@ -33,7 +33,7 @@ async fn main() {
             }
         }
 
-        if let Some(next_animation) = state.update(&animation) {
+        if let Some(next_animation) = state.update(&mut animation) {
             animation = next_animation;
         }
 
