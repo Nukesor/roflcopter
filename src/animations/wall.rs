@@ -1,4 +1,4 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use macroquad::prelude::*;
 
@@ -93,19 +93,33 @@ impl WallAnimation {
                 let height = current_height - self.y_offset % state.font_dimensions.height;
                 let width = current_width - self.x_offset * state.word.len() as f32 * 2.0;
 
-                // Draw the character at the next position.
-                draw_text_ex(
-                    &character.to_string(),
-                    width,
-                    height,
-                    TextParams {
-                        font: state.font,
-                        font_size: state.font_size,
-                        font_scale: 1.0,
-                        color: colors[color_offset],
-                        ..Default::default()
-                    },
-                );
+                // Don't draw the char, if it cannot be seen anyway.
+                let mut skip = false;
+                if width < 0.0 - state.font_dimensions.width {
+                    skip = true;
+                } else if width > state.window_width {
+                    skip = true;
+                } else if height < 0.0 - state.font_dimensions.height {
+                    skip = true;
+                } else if height > state.window_height + state.font_dimensions.height {
+                    skip = true;
+                }
+
+                if !skip {
+                    // Draw the character at the next position.
+                    draw_text_ex(
+                        &character.to_string(),
+                        width,
+                        height,
+                        TextParams {
+                            font: state.font,
+                            font_size: state.font_size,
+                            font_scale: 1.0,
+                            color: colors[color_offset],
+                            ..Default::default()
+                        },
+                    );
+                }
                 current_width += glyph_width;
                 color_offset = (color_offset + 1) % state.word.len();
             }
