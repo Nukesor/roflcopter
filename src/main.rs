@@ -21,6 +21,7 @@ async fn main() {
         CopterAnimation::new(&state, Vec2::new(window_width / 2.0, window_height / 2.0));
 
     loop {
+        println!("FPS: {}", get_fps());
         clear_background(BLACK);
 
         // We're cycling through animations, only one can run at a time.
@@ -42,18 +43,18 @@ async fn main() {
         if let Some(ref transition) = state.transition {
             // Calculate the gradiant, depending on the current state of the transition and,
             // whether it's a phase in or a phase out.
-            let gradiant =
-                transition.timer.as_millis() as f64 / state.transition_duration.as_millis() as f64;
+            let gradiant = (transition.timer.as_millis() as f64
+                / state.transition_duration.as_millis() as f64) as f32;
             let gradiant = match transition.phase {
-                state::Phase::In => (255.0 - 255.0 * gradiant) as u8,
-                state::Phase::Out => (255.0 * gradiant) as u8,
+                state::Phase::In => 1.0 - gradiant,
+                state::Phase::Out => gradiant,
             };
 
             draw_texture_ex(
                 state.black_screen,
                 0.0,
                 0.0,
-                Color::from_rgba(0, 0, 0, gradiant),
+                Color::new(0.0, 0.0, 0.0, gradiant),
                 DrawTextureParams {
                     flip_y: true,
                     ..Default::default()

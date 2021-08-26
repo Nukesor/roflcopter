@@ -23,9 +23,12 @@ impl WallAnimation {
     /// This function is responsible for the actual animation, by determining and updating the offset
     /// to the original start position.
     pub fn update(&mut self, state: &State) {
+        // The current system time, determines the current x/y movement rate.
         let start = SystemTime::now();
         let time = start.duration_since(UNIX_EPOCH).unwrap().as_millis() as f64;
 
+        // The delta time in combination with the movement rate is used to determine the moved
+        // amount.
         let dt = get_frame_time();
 
         // Calculate the amount that has been moved since the last frame.
@@ -39,7 +42,7 @@ impl WallAnimation {
         let moved_amount = dt * y_rate * y_movement_speed;
         self.y_offset = self.y_offset + moved_amount;
 
-        // Set the movement speed relative to the text glyph width
+        // Set the movement speed relative to the text glyph width.
         let x_movement_speed = state.font_dimensions.width * 1.0;
         let x_rate = ((time * 0.3f64 / 1000.0f64).sin()) as f32;
         let moved_amount = dt * x_rate * x_movement_speed;
@@ -77,12 +80,12 @@ impl WallAnimation {
         let (word, colors) = offsetted_word_and_colors(state, offset);
 
         // Runner width variable for this line.
-        let mut current_width: f32 = -state.window_width / 2.0;
+        let mut current_width: f32 = -state.window_width;
         let mut color_offset = 0;
         loop {
             for character in word.chars() {
                 // Exit condition, stop the loop, if the next char doesn't fit onto the screen
-                if current_width + glyph_width > state.window_width * 1.5 {
+                if current_width + glyph_width > state.window_width * 2.0 {
                     return;
                 }
 
