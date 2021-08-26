@@ -4,7 +4,7 @@ use macroquad::prelude::*;
 use macroquad::rand::gen_range;
 
 use crate::{
-    animations::{helper::delta_duration, Animation, CopterAnimation, WallAnimation},
+    animations::{helper::delta_duration, Animation, CopterAnimation, CopterState, WallAnimation},
     color,
 };
 
@@ -37,6 +37,8 @@ pub struct State {
 
     pub window_height: f32,
     pub window_width: f32,
+
+    pub mouse_position: (f32, f32),
 
     pub word: String,
     /// For each character of the word, a color will be assigned.
@@ -73,6 +75,7 @@ impl State {
             transition_duration: Duration::from_secs(2),
             transition,
             black_screen: Texture2D::empty(),
+            mouse_position: mouse_position(),
 
             window_height: screen_height(),
             window_width: screen_width(),
@@ -84,6 +87,7 @@ impl State {
     pub fn update(&mut self, animation: &mut Animation) -> Option<Animation> {
         // Check if the window has been resized and update stuff accordingly.
         self.handle_window_resize(animation);
+        self.handle_mouse_update(animation);
 
         let mut next_animation: Option<Animation> = None;
         let delta_time = delta_duration();
@@ -127,6 +131,33 @@ impl State {
         }
 
         next_animation
+    }
+
+    pub fn handle_mouse_update(&mut self, animation: &mut Animation) {
+        let (x, y) = mouse_position();
+
+        if x == self.mouse_position.0 || y == self.mouse_position.1 {
+            return;
+        }
+
+        println!("mouse pos: {:?}", (x, y));
+        self.mouse_position = (x, y);
+
+        match animation {
+            // While in copter mode, the copter should follow the mouse.
+            Animation::Copter(ref mut copter) => match copter.copter_state {
+                CopterState::Hovering { position, .. } => {
+                    copter.copter_state = CopterState::Flying {
+                        position: position.clone(),
+                        dest: Vec2::new(x, y),
+                    };
+                }
+                CopterState::Flying { ref mut dest, .. } => {
+                    *dest = Vec2::new(x, y);
+                }
+            },
+            _ => {}
+        }
     }
 
     /// Check whether the window size changed.
