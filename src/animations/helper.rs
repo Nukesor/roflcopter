@@ -1,4 +1,4 @@
-use std::{collections::HashMap, time::Duration};
+use std::{collections::HashMap, f32::consts::PI, time::Duration};
 
 use macroquad::{prelude::*, rand::gen_range};
 
@@ -29,6 +29,18 @@ pub fn random_color() -> Color {
 
 pub fn vec2_to_radian(vec: Vec2) -> f32 {
     vec.y.atan2(vec.x)
+}
+
+pub fn random_vector_with_lenght(length: f32) -> Vec2 {
+    let vec = Vec2::new(200.0, 0.0);
+    rotate_vec2(vec, gen_range(0.0, PI * 2.0))
+}
+
+pub fn random_position_on_screen(state: &State) -> Vec2 {
+    Vec2::new(
+        gen_range(100.0, state.window_width - 100.0),
+        gen_range(100.0, state.window_height - 100.0),
+    )
 }
 
 pub fn rotate_vec2(vec: Vec2, angle: f32) -> Vec2 {

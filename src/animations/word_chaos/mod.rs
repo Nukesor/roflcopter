@@ -2,10 +2,7 @@ use std::{collections::HashMap, f32::consts::PI, time::Duration};
 
 use macroquad::{prelude::*, rand::gen_range};
 
-use crate::{
-    animations::helper::{random_color, textures_from_text},
-    state::State,
-};
+use crate::{animations::helper::*, state::State};
 
 use super::helper::{delta_duration, rotate_vec2};
 
@@ -64,11 +61,8 @@ impl WordChaosAnimation {
         WordChaosAnimation {
             words: vec![Word {
                 length: word.len(),
-                position: Vec2::new(
-                    gen_range(100.0, state.window_width - 100.0),
-                    gen_range(100.0, state.window_height - 100.0),
-                ),
-                acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0)),
+                position: random_position_on_screen(state),
+                acceleration: random_vector_with_lenght(gen_range(200.0, 400.0)),
                 color: random_color(),
                 angle: 0.0,
                 angle_rotation: gen_range(0.1, 0.5),
@@ -85,11 +79,8 @@ impl WordChaosAnimation {
     /// Restart the animation, with a new word.
     pub fn next_word(&mut self, state: &State, word: &str) {
         self.words = vec![Word {
-            position: Vec2::new(
-                gen_range(100.0, state.window_width - 100.0),
-                gen_range(100.0, state.window_height - 100.0),
-            ),
-            acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0)),
+            position: random_position_on_screen(state),
+            acceleration: random_vector_with_lenght(gen_range(200.0, 400.0)),
             length: word.len(),
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
@@ -104,7 +95,7 @@ impl WordChaosAnimation {
     pub fn new_word_at_position(&mut self, position: Vec2) {
         self.words.push(Word {
             position,
-            acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0)),
+            acceleration: random_vector_with_lenght(gen_range(200.0, 400.0)),
             length: self.current.len(),
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
