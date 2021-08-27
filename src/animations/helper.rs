@@ -38,9 +38,14 @@ pub fn rotate_vec2(vec: Vec2, angle: f32) -> Vec2 {
     Vec2::new(x, y)
 }
 
-pub fn textures_from_text(state: &State, word: &str, rainbow: bool) -> HashMap<u16, Texture2D> {
+pub fn textures_from_text(
+    state: &State,
+    word: &str,
+    rainbow: bool,
+    start_font_size: u16,
+) -> HashMap<u16, Texture2D> {
     let mut texture_map = HashMap::new();
-    for size in state.font_size - 5..state.font_size + 5 {
+    for size in start_font_size - 5..start_font_size + 5 {
         let texture = texture_from_text(state, word, rainbow, size);
         texture_map.insert(size, texture);
     }
@@ -50,6 +55,7 @@ pub fn textures_from_text(state: &State, word: &str, rainbow: bool) -> HashMap<u
 
 pub fn texture_from_text(state: &State, word: &str, rainbow: bool, font_size: u16) -> Texture2D {
     clear_background(Color::from_rgba(0, 0, 0, 0));
+    let font_dimensions = measure_text("j", Some(state.font), font_size, 1.0);
 
     let mut x = 0.0;
     for (index, character) in word.chars().enumerate() {
@@ -62,7 +68,7 @@ pub fn texture_from_text(state: &State, word: &str, rainbow: bool, font_size: u1
         draw_text_ex(
             &character.to_string(),
             x,
-            state.font_dimensions.height,
+            font_dimensions.height,
             TextParams {
                 font: state.font,
                 font_size,
@@ -71,18 +77,16 @@ pub fn texture_from_text(state: &State, word: &str, rainbow: bool, font_size: u1
                 ..Default::default()
             },
         );
-        x += state.font_dimensions.width;
+        x += font_dimensions.width;
     }
 
     // Make a screenshot and extract the roflcopter from it.
     let image = get_screen_data();
     let image = image.sub_image(Rect {
         x: 0.0,
-        y: image.height as f32
-            - state.font_dimensions.height
-            - state.font_dimensions.offset_y / 2.0,
+        y: image.height as f32 - font_dimensions.height - font_dimensions.offset_y / 2.0,
         w: x,
-        h: state.font_dimensions.height + state.font_dimensions.offset_y / 2.0,
+        h: font_dimensions.height + font_dimensions.offset_y / 2.0,
     });
 
     clear_background(BLACK);

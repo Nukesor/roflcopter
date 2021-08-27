@@ -52,12 +52,15 @@ pub struct WordChaosAnimation {
 
     pub spawn_timeout: Duration,
     pub spawn_timer: Duration,
+    pub font_size: u16,
 }
 
 impl WordChaosAnimation {
     pub fn new(state: &State) -> WordChaosAnimation {
         let word = "Roflcopter".to_owned();
-        let textures = textures_from_text(state, &word, false);
+        let font_size = (state.font_size as f32 * 1.5) as u16;
+        let textures = textures_from_text(state, &word, false, font_size);
+
         WordChaosAnimation {
             words: vec![Word {
                 length: word.len(),
@@ -69,12 +72,13 @@ impl WordChaosAnimation {
                 color: random_color(),
                 angle: 0.0,
                 angle_rotation: gen_range(0.1, 0.5),
-                font_size: state.font_size,
+                font_size: font_size,
             }],
             texture_map: textures,
             spawn_timeout: Duration::from_millis(300),
             spawn_timer: Duration::from_millis(0),
             current: word,
+            font_size,
         }
     }
 
@@ -90,14 +94,14 @@ impl WordChaosAnimation {
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
             angle_rotation: gen_range(0.1, 0.2),
-            font_size: state.font_size,
+            font_size: self.font_size,
         }];
-        self.texture_map = textures_from_text(state, &word, false);
+        self.texture_map = textures_from_text(state, &word, false, self.font_size);
         self.current = word.to_owned();
     }
 
     /// Restart the animation, with a new word.
-    pub fn new_word_at_position(&mut self, state: &State, position: Vec2) {
+    pub fn new_word_at_position(&mut self, position: Vec2) {
         self.words.push(Word {
             position,
             acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0)),
@@ -105,14 +109,14 @@ impl WordChaosAnimation {
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
             angle_rotation: gen_range(0.1, 0.2),
-            font_size: state.font_size,
+            font_size: self.font_size,
         });
     }
 
     /// Update our word texture.
     /// This is necessary, if the screen get's resized.
     pub fn update_texture(&mut self, state: &State) {
-        self.texture_map = textures_from_text(state, &self.current, false);
+        self.texture_map = textures_from_text(state, &self.current, false, self.font_size);
     }
 
     pub fn update(&mut self, state: &State) {
@@ -202,7 +206,7 @@ impl WordChaosAnimation {
                         x: 0.0,
                         y: 0.0,
                         w: width,
-                        h: texture.height(),
+                        h: texture.height() * 1.2,
                     }),
                     rotation: word.angle + PI,
                     flip_y: true,
@@ -226,10 +230,7 @@ impl WordChaosAnimation {
 
         if self.spawn_timer > self.spawn_timeout {
             if is_mouse_button_down(MouseButton::Left) {
-                self.new_word_at_position(
-                    state,
-                    Vec2::new(state.mouse_position.0, state.mouse_position.1),
-                )
+                self.new_word_at_position(Vec2::new(state.mouse_position.0, state.mouse_position.1))
             }
             self.spawn_timer = Duration::from_secs(0);
         }
