@@ -39,7 +39,7 @@ pub fn rotate_vec2(vec: Vec2, angle: f32) -> Vec2 {
 }
 
 pub fn texture_from_text(state: &State, word: &str, rainbow: bool) -> Texture2D {
-    clear_background(BLACK);
+    clear_background(Color::from_rgba(0, 0, 0, 0));
 
     let mut x = 0.0;
     for (index, character) in word.chars().enumerate() {

@@ -83,8 +83,8 @@ impl WordChaosAnimation {
                 gen_range(100.0, state.window_width - 100.0),
                 gen_range(100.0, state.window_height - 100.0),
             ),
-            acceleration: Vec2::new(gen_range(-200.0, 200.0), gen_range(-200.0, 200.0))
-                * (state.window_width / 300.0),
+            acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0))
+                * (state.window_width / 500.0),
             length: word.len(),
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
@@ -98,8 +98,8 @@ impl WordChaosAnimation {
     pub fn new_word_at_position(&mut self, state: &State, position: Vec2) {
         self.words.push(Word {
             position,
-            acceleration: Vec2::new(gen_range(-200.0, 200.0), gen_range(-200.0, 200.0))
-                * (state.window_width / 300.0),
+            acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0))
+                * (state.window_width / 500.0),
             length: self.current.len(),
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
@@ -203,10 +203,11 @@ impl WordChaosAnimation {
             );
         }
         draw_text(&format!("FPS: {}", get_fps()), 20.0, 20.0, 20.0, WHITE);
+        draw_text(&format!("Word: {}", self.current), 20.0, 40.0, 20.0, WHITE);
         draw_text(
             &format!("Words: {}", self.words.len()),
             20.0,
-            40.0,
+            60.0,
             20.0,
             WHITE,
         );
