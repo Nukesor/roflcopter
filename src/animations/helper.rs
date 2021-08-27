@@ -32,7 +32,7 @@ pub fn vec2_to_radian(vec: Vec2) -> f32 {
 }
 
 pub fn random_vector_with_lenght(length: f32) -> Vec2 {
-    let vec = Vec2::new(200.0, 0.0);
+    let vec = Vec2::new(length, 0.0);
     rotate_vec2(vec, gen_range(0.0, PI * 2.0))
 }
 
