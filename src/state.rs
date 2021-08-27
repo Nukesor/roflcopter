@@ -202,7 +202,7 @@ impl State {
             match animation {
                 Animation::Wall(_) => {}
                 Animation::Copter(inner) => inner.copter_images.update(self),
-                Animation::WordChaos(_) => {}
+                Animation::WordChaos(inner) => inner.update_texture(&self),
             }
         }
     }
