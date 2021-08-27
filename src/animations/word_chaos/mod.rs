@@ -1,9 +1,9 @@
-use std::{f32::consts::PI, time::Duration};
+use std::{collections::HashMap, f32::consts::PI, time::Duration};
 
 use macroquad::{prelude::*, rand::gen_range};
 
 use crate::{
-    animations::helper::{random_color, texture_from_text},
+    animations::helper::{random_color, textures_from_text},
     state::State,
 };
 
@@ -24,6 +24,7 @@ pub struct Word {
     pub color: Color,
     pub angle: f32,
     pub angle_rotation: f32,
+    pub font_size: u16,
 }
 
 impl Word {
@@ -47,7 +48,7 @@ impl Word {
 pub struct WordChaosAnimation {
     pub words: Vec<Word>,
     pub current: String,
-    pub word_texture: Texture2D,
+    pub texture_map: HashMap<u16, Texture2D>,
 
     pub spawn_timeout: Duration,
     pub spawn_timer: Duration,
@@ -56,6 +57,7 @@ pub struct WordChaosAnimation {
 impl WordChaosAnimation {
     pub fn new(state: &State) -> WordChaosAnimation {
         let word = "Roflcopter".to_owned();
+        let textures = textures_from_text(state, &word, false);
         WordChaosAnimation {
             words: vec![Word {
                 length: word.len(),
@@ -63,13 +65,13 @@ impl WordChaosAnimation {
                     gen_range(100.0, state.window_width - 100.0),
                     gen_range(100.0, state.window_height - 100.0),
                 ),
-                acceleration: Vec2::new(gen_range(-200.0, 200.0), gen_range(-200.0, 200.0))
-                    * (state.window_width / 300.0),
+                acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0)),
                 color: random_color(),
                 angle: 0.0,
                 angle_rotation: gen_range(0.1, 0.5),
+                font_size: state.font_size,
             }],
-            word_texture: texture_from_text(state, &word, false),
+            texture_map: textures,
             spawn_timeout: Duration::from_millis(300),
             spawn_timer: Duration::from_millis(0),
             current: word,
@@ -83,14 +85,14 @@ impl WordChaosAnimation {
                 gen_range(100.0, state.window_width - 100.0),
                 gen_range(100.0, state.window_height - 100.0),
             ),
-            acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0))
-                * (state.window_width / 500.0),
+            acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0)),
             length: word.len(),
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
             angle_rotation: gen_range(0.1, 0.2),
+            font_size: state.font_size,
         }];
-        self.word_texture = texture_from_text(state, &word, false);
+        self.texture_map = textures_from_text(state, &word, false);
         self.current = word.to_owned();
     }
 
@@ -98,19 +100,19 @@ impl WordChaosAnimation {
     pub fn new_word_at_position(&mut self, state: &State, position: Vec2) {
         self.words.push(Word {
             position,
-            acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0))
-                * (state.window_width / 500.0),
+            acceleration: Vec2::new(gen_range(100.0, 200.0), gen_range(100.0, 200.0)),
             length: self.current.len(),
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
             angle_rotation: gen_range(0.1, 0.2),
+            font_size: state.font_size,
         });
     }
 
     /// Update our word texture.
     /// This is necessary, if the screen get's resized.
     pub fn update_texture(&mut self, state: &State) {
-        self.word_texture = texture_from_text(state, &self.current, false);
+        self.texture_map = textures_from_text(state, &self.current, false);
     }
 
     pub fn update(&mut self, state: &State) {
@@ -121,6 +123,7 @@ impl WordChaosAnimation {
         let mut new_words = vec![];
         let mut words_to_remove = vec![];
         let current_words = self.words.len();
+        let font_sizes: Vec<u16> = self.texture_map.keys().cloned().collect();
 
         for (index, word) in self.words.iter_mut().enumerate() {
             word.angle = word.angle + word.angle_rotation * dt;
@@ -155,6 +158,7 @@ impl WordChaosAnimation {
 
                 // Slightly change acceleration
                 word.acceleration = rotate_vec2(word.acceleration, gen_range(0.1, 0.4));
+                word.acceleration = word.acceleration * gen_range(1.1, 1.2);
 
                 // If the word is gone, schedule it for removal.
                 // Otherwise, split it and spawn new ones.
@@ -164,7 +168,9 @@ impl WordChaosAnimation {
                     word.length -= 1;
 
                     if (current_words + new_words.len()) < 50000 {
-                        spawn_new_word(&mut new_words, &word, collision);
+                        let mut new_word = get_new_word(&word, collision);
+                        new_word.font_size = font_sizes[gen_range(0, font_sizes.len() - 1)];
+                        new_words.push(new_word);
                     }
                 }
             }
@@ -182,10 +188,12 @@ impl WordChaosAnimation {
         }
     }
 
-    pub fn draw(&self, state: &State) {
+    pub fn draw(&self, _: &State) {
         for word in self.words.iter() {
+            let texture = self.texture_map.get(&word.font_size).unwrap();
+            let width = (texture.width() / self.current.len() as f32) * word.length as f32;
             draw_texture_ex(
-                self.word_texture,
+                *texture,
                 word.position.x,
                 word.position.y,
                 word.color,
@@ -193,8 +201,8 @@ impl WordChaosAnimation {
                     source: Some(Rect {
                         x: 0.0,
                         y: 0.0,
-                        w: word.length as f32 * state.font_dimensions.width,
-                        h: state.font_dimensions.height + state.font_dimensions.offset_y,
+                        w: width,
+                        h: texture.height(),
                     }),
                     rotation: word.angle + PI,
                     flip_y: true,
@@ -243,7 +251,7 @@ fn detect_collision(middle: Vec2, state: &State) -> Option<Collision> {
     None
 }
 
-fn spawn_new_word(new_words: &mut Vec<Word>, word: &Word, collision: Collision) {
+fn get_new_word(word: &Word, collision: Collision) -> Word {
     let mut new_word = Word { ..word.clone() };
     new_word.acceleration.x = new_word.acceleration.x * gen_range(1.1, 1.3);
     new_word.acceleration.y = new_word.acceleration.y * gen_range(1.1, 1.3);
@@ -264,5 +272,5 @@ fn spawn_new_word(new_words: &mut Vec<Word>, word: &Word, collision: Collision) 
     }
     new_word.color = random_color();
 
-    new_words.push(new_word);
+    new_word
 }

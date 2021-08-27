@@ -23,7 +23,7 @@ impl CopterImages {
             right_copter_left_rotor: draw_raw_copter(state, Direction::Right, Direction::Left),
             left_copter_right_rotor: draw_raw_copter(state, Direction::Left, Direction::Right),
             left_copter_left_rotor: draw_raw_copter(state, Direction::Left, Direction::Left),
-            shot: texture_from_text(state, &state.word, true),
+            shot: texture_from_text(state, &state.word, true, state.font_size),
         }
     }
 

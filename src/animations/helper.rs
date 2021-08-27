@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{collections::HashMap, time::Duration};
 
 use macroquad::{prelude::*, rand::gen_range};
 
@@ -38,7 +38,17 @@ pub fn rotate_vec2(vec: Vec2, angle: f32) -> Vec2 {
     Vec2::new(x, y)
 }
 
-pub fn texture_from_text(state: &State, word: &str, rainbow: bool) -> Texture2D {
+pub fn textures_from_text(state: &State, word: &str, rainbow: bool) -> HashMap<u16, Texture2D> {
+    let mut texture_map = HashMap::new();
+    for size in state.font_size - 5..state.font_size + 5 {
+        let texture = texture_from_text(state, word, rainbow, size);
+        texture_map.insert(size, texture);
+    }
+
+    texture_map
+}
+
+pub fn texture_from_text(state: &State, word: &str, rainbow: bool, font_size: u16) -> Texture2D {
     clear_background(Color::from_rgba(0, 0, 0, 0));
 
     let mut x = 0.0;
@@ -55,7 +65,7 @@ pub fn texture_from_text(state: &State, word: &str, rainbow: bool) -> Texture2D 
             state.font_dimensions.height,
             TextParams {
                 font: state.font,
-                font_size: state.font_size,
+                font_size,
                 font_scale: 1.0,
                 color,
                 ..Default::default()
