@@ -15,7 +15,6 @@ pub struct Word {
     pub color: Color,
     pub angle: f32,
     pub angle_rotation: f32,
-    pub dead: bool,
 }
 
 impl Word {
@@ -40,7 +39,6 @@ pub struct WordChaosAnimation {
     pub words: Vec<Word>,
     pub current: String,
     pub word_texture: Texture2D,
-    pub active_words: usize,
 }
 
 impl WordChaosAnimation {
@@ -57,11 +55,9 @@ impl WordChaosAnimation {
                 color: random_color(),
                 angle: 0.0,
                 angle_rotation: gen_range(0.1, 0.5),
-                dead: false,
             }],
             word_texture: texture_from_text(state, &word, false),
             current: word,
-            active_words: 1,
         }
     }
 
@@ -77,11 +73,9 @@ impl WordChaosAnimation {
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
             angle_rotation: gen_range(0.1, 0.2),
-            dead: false,
         }];
         self.word_texture = texture_from_text(state, &word, false);
         self.current = word.to_owned();
-        self.active_words = 1;
     }
 
     /// Update our word texture.
@@ -94,11 +88,10 @@ impl WordChaosAnimation {
         let dt = get_frame_time();
 
         let mut new_words = vec![];
-        for word in self.words.iter_mut() {
-            if word.dead {
-                continue;
-            }
+        let mut words_to_remove = vec![];
+        let current_words = self.words.len();
 
+        for (index, word) in self.words.iter_mut().enumerate() {
             word.angle = word.angle + word.angle_rotation * dt;
             word.position = word.position + word.acceleration * dt;
             let middle = word.mid_position(state);
@@ -106,7 +99,7 @@ impl WordChaosAnimation {
             // Check collisions on all sides
             let mut collision = false;
             if middle.x > state.window_width + 1.0 {
-                word.set_x_from_mid(state, state.window_width);
+                word.set_x_from_mid(state, state.window_width - 1.0);
                 word.acceleration.x = -word.acceleration.x;
                 collision = true;
             }
@@ -116,12 +109,12 @@ impl WordChaosAnimation {
                 collision = true;
             }
             if middle.y > state.window_height + 1.0 {
-                word.set_y_from_mid(state, state.window_height);
+                word.set_y_from_mid(state, state.window_height - 1.0);
                 word.acceleration.y = -word.acceleration.y;
                 collision = true;
             }
             if middle.y < -1.0 {
-                word.set_y_from_mid(state, 0.0);
+                word.set_y_from_mid(state, 1.0);
                 word.acceleration.y = -word.acceleration.y;
                 collision = true;
             }
@@ -132,23 +125,20 @@ impl WordChaosAnimation {
                 // If the word is gone, schedule it for removal.
                 // Otherwise, split it and spawn new ones.
                 if word.length == 1 {
-                    word.dead = true;
-                    self.active_words -= 1;
+                    words_to_remove.push(index)
                 } else {
                     word.length -= 1;
 
-                    //if (self.active_words + new_words.len()) < 50000 {
-                    spawn_new_words(&mut new_words, &word);
-                    //}
+                    if (current_words + new_words.len()) < 50000 {
+                        spawn_new_words(&mut new_words, &word);
+                    }
                 }
             }
         }
-        self.active_words += new_words.len();
-
         // Append all new words.
         self.words.append(&mut new_words);
 
-        if self.active_words == 0 {
+        if self.words.is_empty() {
             self.next_word(state, "Roflcopter");
         }
     }
@@ -175,13 +165,12 @@ impl WordChaosAnimation {
         }
         draw_text(&format!("FPS: {}", get_fps()), 20.0, 20.0, 20.0, WHITE);
         draw_text(
-            &format!("Words: {}", self.active_words),
+            &format!("Words: {}", self.words.len()),
             20.0,
             40.0,
             20.0,
             WHITE,
         );
-        println!("FPS: {}: Words: {}", get_fps(), self.active_words);
     }
 }
 
