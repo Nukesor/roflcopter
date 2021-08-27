@@ -15,6 +15,7 @@ pub struct Word {
     pub color: Color,
     pub angle: f32,
     pub angle_rotation: f32,
+    pub dead: bool,
 }
 
 impl Word {
@@ -39,6 +40,7 @@ pub struct WordChaosAnimation {
     pub words: Vec<Word>,
     pub current: String,
     pub word_texture: Texture2D,
+    pub active_words: usize,
 }
 
 impl WordChaosAnimation {
@@ -47,29 +49,39 @@ impl WordChaosAnimation {
         WordChaosAnimation {
             words: vec![Word {
                 length: word.len(),
-                position: Vec2::new(200.0, 200.0),
-                acceleration: Vec2::new(100.0, 100.0),
+                position: Vec2::new(
+                    gen_range(100.0, state.window_width - 100.0),
+                    gen_range(100.0, state.window_height - 100.0),
+                ),
+                acceleration: Vec2::new(gen_range(-200.0, 200.0), gen_range(-200.0, 200.0)),
                 color: random_color(),
                 angle: 0.0,
-                angle_rotation: 0.5,
+                angle_rotation: gen_range(0.1, 0.5),
+                dead: false,
             }],
             word_texture: texture_from_text(state, &word, false),
             current: word,
+            active_words: 1,
         }
     }
 
     /// Restart the animation, with a new word.
-    pub fn next_word(&mut self, state: &State, word: String) {
+    pub fn next_word(&mut self, state: &State, word: &str) {
         self.words = vec![Word {
-            position: Vec2::new(200.0, 200.0),
-            acceleration: Vec2::new(100.0, 100.0),
+            position: Vec2::new(
+                gen_range(100.0, state.window_width - 100.0),
+                gen_range(100.0, state.window_height - 100.0),
+            ),
+            acceleration: Vec2::new(gen_range(-200.0, 200.0), gen_range(-200.0, 200.0)),
             length: word.len(),
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
             angle_rotation: gen_range(0.1, 0.2),
+            dead: false,
         }];
         self.word_texture = texture_from_text(state, &word, false);
-        self.current = word;
+        self.current = word.to_owned();
+        self.active_words = 1;
     }
 
     /// Update our word texture.
@@ -80,28 +92,64 @@ impl WordChaosAnimation {
 
     pub fn update(&mut self, state: &State) {
         let dt = get_frame_time();
-        for word in self.words.iter_mut() {
-            word.angle = word.angle + word.angle_rotation * dt;
 
+        let mut new_words = vec![];
+        for word in self.words.iter_mut() {
+            if word.dead {
+                continue;
+            }
+
+            word.angle = word.angle + word.angle_rotation * dt;
             word.position = word.position + word.acceleration * dt;
             let middle = word.mid_position(state);
 
-            if middle.x > state.window_width {
+            // Check collisions on all sides
+            let mut collision = false;
+            if middle.x > state.window_width + 1.0 {
                 word.set_x_from_mid(state, state.window_width);
                 word.acceleration.x = -word.acceleration.x;
+                collision = true;
             }
-            if middle.x < 0.0 {
-                word.set_x_from_mid(state, 0.0);
+            if middle.x < -1.0 {
+                word.set_x_from_mid(state, 1.0);
                 word.acceleration.x = -word.acceleration.x;
+                collision = true;
             }
-            if middle.y > state.window_height {
+            if middle.y > state.window_height + 1.0 {
                 word.set_y_from_mid(state, state.window_height);
                 word.acceleration.y = -word.acceleration.y;
+                collision = true;
             }
-            if middle.y < 0.0 {
+            if middle.y < -1.0 {
                 word.set_y_from_mid(state, 0.0);
                 word.acceleration.y = -word.acceleration.y;
+                collision = true;
             }
+
+            // Generic collision handler
+            if collision {
+                word.angle_rotation = gen_range(1.1, 1.4);
+                // If the word is gone, schedule it for removal.
+                // Otherwise, split it and spawn new ones.
+                if word.length == 1 {
+                    word.dead = true;
+                    self.active_words -= 1;
+                } else {
+                    word.length -= 1;
+
+                    //if (self.active_words + new_words.len()) < 50000 {
+                    spawn_new_words(&mut new_words, &word);
+                    //}
+                }
+            }
+        }
+        self.active_words += new_words.len();
+
+        // Append all new words.
+        self.words.append(&mut new_words);
+
+        if self.active_words == 0 {
+            self.next_word(state, "Roflcopter");
         }
     }
 
@@ -125,5 +173,25 @@ impl WordChaosAnimation {
                 },
             );
         }
+        draw_text(&format!("FPS: {}", get_fps()), 20.0, 20.0, 20.0, WHITE);
+        draw_text(
+            &format!("Words: {}", self.active_words),
+            20.0,
+            40.0,
+            20.0,
+            WHITE,
+        );
+        println!("FPS: {}: Words: {}", get_fps(), self.active_words);
+    }
+}
+
+fn spawn_new_words(new_words: &mut Vec<Word>, word: &Word) {
+    for _ in 0..1 {
+        let mut new_word = Word { ..word.clone() };
+        new_word.acceleration.x = new_word.acceleration.x * gen_range(1.1, 1.3);
+        new_word.acceleration.y = new_word.acceleration.y * gen_range(1.1, 1.3);
+        new_word.color = random_color();
+
+        new_words.push(new_word);
     }
 }

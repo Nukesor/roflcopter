@@ -27,7 +27,7 @@ pub fn random_color() -> Color {
     Color::from_rgba(gen_range(0, 255), gen_range(0, 255), gen_range(0, 255), 255)
 }
 
-pub fn texture_from_text(state: &State, word: &String, rainbow: bool) -> Texture2D {
+pub fn texture_from_text(state: &State, word: &str, rainbow: bool) -> Texture2D {
     clear_background(BLACK);
 
     let mut x = 0.0;
