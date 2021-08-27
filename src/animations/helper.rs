@@ -27,6 +27,17 @@ pub fn random_color() -> Color {
     Color::from_rgba(gen_range(0, 255), gen_range(0, 255), gen_range(0, 255), 255)
 }
 
+pub fn vec2_to_radian(vec: Vec2) -> f32 {
+    vec.y.atan2(vec.x)
+}
+
+pub fn rotate_vec2(vec: Vec2, angle: f32) -> Vec2 {
+    let x = vec.x * angle.cos() - vec.y * angle.sin();
+    let y = vec.x * angle.sin() + vec.y * angle.cos();
+
+    Vec2::new(x, y)
+}
+
 pub fn texture_from_text(state: &State, word: &str, rainbow: bool) -> Texture2D {
     clear_background(BLACK);
 
