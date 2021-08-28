@@ -184,9 +184,10 @@ impl CopterAnimation {
                 ref copter_direction,
             } => {
                 // We animate hovering by following in a sinus curve depending on the time
-                let mut current_rotation = timer.as_millis() as f32 / duration.as_millis() as f32;
+                let mut current_rotation = (timer.as_millis() as f64 / 1000.0f64) as f32;
                 // Speed up things a little
-                current_rotation = current_rotation * 1.4;
+                current_rotation = current_rotation * 1.2;
+
                 let offset = (current_rotation * 2.0 * PI).sin();
                 let x = position.x;
                 let y = position.y + offset * state.font_dimensions.height;
