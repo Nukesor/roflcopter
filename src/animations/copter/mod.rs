@@ -346,14 +346,15 @@ impl CopterAnimation {
                 let mut best_position: Option<(f32, Vec2)> = None;
                 for enemy in self.enemies.iter() {
                     let distance = (copter_position - enemy.position).length();
-                    if let Some((distance, _)) = best_position {
-                        if distance > distance {
+                    if let Some((old_distance, _)) = best_position {
+                        if old_distance > distance {
                             best_position = Some((distance, enemy.position));
                         }
                     } else {
                         best_position = Some((distance, enemy.position));
                     }
                 }
+
                 // Fire a shot, if we found an enemy.
                 if let Some((_, position)) = best_position {
                     self.fire_shot(position);
