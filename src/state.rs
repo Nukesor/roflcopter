@@ -82,7 +82,7 @@ impl State {
         }
 
         //let animation_duration = Duration::from_secs(gen_range(10, 25));
-        let animation_duration = Duration::from_secs(40);
+        let animation_duration = Duration::from_secs(80);
         let animation_timer = Duration::from_secs(0);
 
         // Start the phase in transition animation
