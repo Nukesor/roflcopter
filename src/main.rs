@@ -1,15 +1,18 @@
 use macroquad::prelude::*;
 use simplelog::{Config, LevelFilter, SimpleLogger};
 
-mod animations;
-mod color;
-mod shaders;
-mod state;
+use roflcopter_lib::animations::*;
+use roflcopter_lib::state::State;
 
-use crate::animations::*;
-use crate::state::State;
+fn window_conf() -> Conf {
+    Conf {
+        window_title: "Roflcopter".to_owned(),
+        fullscreen: true,
+        ..Default::default()
+    }
+}
 
-#[macroquad::main("Text")]
+#[macroquad::main(window_conf)]
 async fn main() {
     setup();
     let mut state = State::new().await;
@@ -52,29 +55,6 @@ async fn main() {
         if let Some(next_animation) = state.update(&mut animation) {
             animation = next_animation;
         }
-
-        if let Some(ref transition) = state.transition {
-            // Calculate the gradiant, depending on the current state of the transition and,
-            // whether it's a phase in or a phase out.
-            let gradiant = (transition.timer.as_millis() as f64
-                / state.transition_duration.as_millis() as f64) as f32;
-            let gradiant = match transition.phase {
-                state::Phase::In => 1.0 - gradiant,
-                state::Phase::Out => gradiant,
-            };
-
-            draw_texture_ex(
-                state.black_screen,
-                0.0,
-                0.0,
-                Color::new(0.0, 0.0, 0.0, gradiant),
-                DrawTextureParams {
-                    flip_y: true,
-                    ..Default::default()
-                },
-            )
-        }
-
         next_frame().await
     }
 }

@@ -6,7 +6,7 @@ pub mod word_chaos;
 pub use copter::*;
 pub use helper::*;
 use macroquad::prelude::Vec2;
-use roflcopter_lib::game_state::GameState;
+use roflcopter_snake_lib::game_state::GameState;
 pub use wall::WallAnimation;
 
 use crate::state::State;

@@ -1,7 +1,6 @@
 use std::{ops::Add, time::Duration};
 
 use macroquad::prelude::*;
-use macroquad::rand::gen_range;
 
 use crate::{
     animations::{
@@ -73,7 +72,7 @@ impl State {
         colors.truncate(word.len());
 
         //let animation_duration = Duration::from_secs(gen_range(10, 25));
-        let animation_duration = Duration::from_secs(120);
+        let animation_duration = Duration::from_secs(40);
         let animation_timer = Duration::from_secs(0);
 
         // Start the phase in transition animation
@@ -156,7 +155,6 @@ impl State {
 
             self.skip_animation = false;
             self.animation_timer = Duration::from_secs(0);
-            self.animation_duration = Duration::from_secs(gen_range(8, 15));
 
             // Start the phase in transition animation
             self.transition = Some(Transition {
@@ -168,7 +166,33 @@ impl State {
         next_animation
     }
 
+    /// Animation independant draw logic.
+    /// This includes animation transition logic.
     pub fn draw(&self) {
+        if let Some(ref transition) = self.transition {
+            // Calculate the gradiant, depending on the current state of the transition and,
+            // whether it's a phase in or a phase out.
+            let gradiant = (transition.timer.as_millis() as f64
+                / self.transition_duration.as_millis() as f64) as f32;
+            let gradiant = match transition.phase {
+                Phase::In => 1.0 - gradiant,
+                Phase::Out => gradiant,
+            };
+
+            draw_texture_ex(
+                self.black_screen,
+                0.0,
+                0.0,
+                Color::new(0.0, 0.0, 0.0, gradiant),
+                DrawTextureParams {
+                    flip_y: true,
+                    ..Default::default()
+                },
+            )
+        }
+
+
+
         if self.show_debug {
             draw_text(&format!("FPS: {}", get_fps()), 20.0, 20.0, 20.0, WHITE);
             draw_text(
@@ -179,7 +203,7 @@ impl State {
                 WHITE,
             );
             draw_text(
-                &format!("Timer: {:?}", self.animation_timer),
+                &format!("Timer: {:.2?}", self.animation_timer),
                 20.0,
                 60.0,
                 20.0,
