@@ -4,10 +4,7 @@ use std::{
     time::Duration,
 };
 
-use macroquad::{
-    prelude::*,
-    rand::{gen_range, ChooseRandom},
-};
+use macroquad::{prelude::*, rand::gen_range};
 
 mod draw;
 mod images;
@@ -67,6 +64,7 @@ pub struct CopterAnimation {
     shots: Vec<Shot>,
 
     enemies: Vec<Enemy>,
+    spawn_enemies: bool,
     enemy_speed: f32,
     enemy_texture: Texture2D,
     enemy_timer: Duration,
@@ -88,11 +86,12 @@ impl CopterAnimation {
             copter_images: CopterImages::new(state),
             copter_state,
 
-            shot_timeout: Duration::from_millis(150),
+            shot_timeout: Duration::from_millis(110),
             shot_timer: Duration::from_secs(0),
             shots: vec![],
 
             enemies: vec![],
+            spawn_enemies: true,
             enemy_texture: texture_from_text(state, "HURENSOHN", false, state.font_size),
             enemy_speed: state.window_width / 20.0,
             enemy_duration: Duration::from_millis(100),
@@ -255,6 +254,9 @@ impl CopterAnimation {
 
     /// Update the enemy spawn timer and spawn enemies, if it's time.
     fn spawn_enemies(&mut self, state: &State) {
+        if !self.spawn_enemies {
+            return;
+        }
         self.enemy_timer += delta_duration();
 
         // It isn't time yet.
@@ -297,9 +299,9 @@ impl CopterAnimation {
     /// Tick all shots and spawn new ones, if the mouse is down.
     pub fn handle_shots(&mut self, state: &State) {
         // Animate the shots
-        let mut to_remove = Vec::new();
+        let mut shots_to_remove = Vec::new();
         let mut enemies_to_remove = Vec::new();
-        for (index, shot) in self.shots.iter_mut().enumerate() {
+        for (shot_index, shot) in self.shots.iter_mut().enumerate() {
             let speed = state.window_width / 60.0;
 
             let direction = Vec2::new(shot.angle.cos(), shot.angle.sin());
@@ -308,10 +310,11 @@ impl CopterAnimation {
             shot.position = shot.position + distance;
 
             // Check enemy collision
-            for (index, enemy) in self.enemies.iter().enumerate() {
+            for (enemy_index, enemy) in self.enemies.iter().enumerate() {
                 let distance = shot.position - enemy.position;
                 if distance.length() < 50.0 {
-                    enemies_to_remove.push(index);
+                    enemies_to_remove.push(enemy_index);
+                    shots_to_remove.push(shot_index);
                 }
             }
 
@@ -322,15 +325,18 @@ impl CopterAnimation {
                 || shot.position.y > state.window_height + text_width
                 || shot.position.y < 0.0 - text_width
             {
-                to_remove.push(index);
+                shots_to_remove.push(shot_index);
             }
         }
-        to_remove.reverse();
-        for index in to_remove {
+        shots_to_remove.sort();
+        shots_to_remove.dedup();
+        shots_to_remove.reverse();
+        for index in shots_to_remove {
             self.shots.remove(index);
         }
 
         enemies_to_remove.sort();
+        enemies_to_remove.dedup();
         enemies_to_remove.reverse();
         for index in enemies_to_remove {
             self.enemies.remove(index);
