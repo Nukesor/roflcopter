@@ -44,6 +44,7 @@ impl Word {
 #[derive(Debug, Clone)]
 pub struct WordChaosAnimation {
     pub words: Vec<Word>,
+    pub word_limit: usize,
     pub current: String,
     pub texture_map: HashMap<u16, Texture2D>,
 
@@ -68,6 +69,7 @@ impl WordChaosAnimation {
                 angle_rotation: gen_range(0.1, 0.5),
                 font_size: font_size,
             }],
+            word_limit: 500,
             texture_map: textures,
             spawn_timeout: Duration::from_millis(300),
             spawn_timer: Duration::from_millis(0),
@@ -112,6 +114,7 @@ impl WordChaosAnimation {
 
     pub fn update(&mut self, state: &State) {
         let dt = get_frame_time();
+        let max_speed = state.window_width / 4.0;
 
         self.handle_mouse_click(state);
 
@@ -135,8 +138,8 @@ impl WordChaosAnimation {
                 } else {
                     word.length -= 1;
 
-                    if (current_words + new_words.len()) < 1000 {
-                        let mut new_word = get_new_word(state, &word);
+                    if (current_words + new_words.len()) < self.word_limit {
+                        let mut new_word = get_new_word(state, &word, max_speed);
                         new_word.font_size = font_sizes[gen_range(0, font_sizes.len() - 1)];
                         new_words.push(new_word);
                     }
@@ -167,6 +170,8 @@ impl WordChaosAnimation {
                             word.acceleration.y = -word.acceleration.y;
                         }
                     }
+
+                    word.acceleration = word.acceleration.clamp_length_max(max_speed);
                 }
             }
         }
@@ -244,12 +249,14 @@ fn detect_collision(middle: Vec2, state: &State) -> Option<Collision> {
     None
 }
 
-fn get_new_word(state: &State, word: &Word) -> Word {
+fn get_new_word(state: &State, word: &Word, max_speed: f32) -> Word {
     let mut new_word = Word { ..word.clone() };
     new_word.acceleration.x = new_word.acceleration.x * gen_range(1.1, 1.3);
     new_word.acceleration.y = new_word.acceleration.y * gen_range(1.1, 1.3);
 
-    new_word.acceleration = rotate_vec2(new_word.acceleration, PI);
+    new_word.acceleration = new_word.acceleration.clamp_length_max(max_speed);
+
+    new_word.acceleration = rotate_vec2(new_word.acceleration, PI + gen_range(0.1, 0.2));
 
     // Handle position out of bounds sides
     let middle = new_word.mid_position(state);
