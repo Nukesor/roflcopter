@@ -162,7 +162,7 @@ impl WordChaosAnimation {
                 } else {
                     word.length -= 1;
 
-                    if (current_words + new_words.len()) < 50000 {
+                    if (current_words + new_words.len()) < 1000 {
                         let mut new_word = get_new_word(&word, collision);
                         new_word.font_size = font_sizes[gen_range(0, font_sizes.len() - 1)];
                         new_words.push(new_word);
