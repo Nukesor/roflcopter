@@ -91,7 +91,7 @@ impl CopterAnimation {
             shots: vec![],
 
             enemies: vec![],
-            spawn_enemies: true,
+            spawn_enemies: false,
             enemy_texture: texture_from_text(state, "HURENSOHN", false, state.font_size),
             enemy_speed: state.window_width / 20.0,
             enemy_duration: Duration::from_millis(100),
