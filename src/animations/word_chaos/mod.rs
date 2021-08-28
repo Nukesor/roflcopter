@@ -183,7 +183,7 @@ impl WordChaosAnimation {
         }
     }
 
-    pub fn draw(&self, _: &State) {
+    pub fn draw(&self, state: &State) {
         for word in self.words.iter() {
             let texture = self.texture_map.get(&word.font_size).unwrap();
             let width = (texture.width() / self.current.len() as f32) * word.length as f32;
@@ -205,15 +205,16 @@ impl WordChaosAnimation {
                 },
             );
         }
-        draw_text(&format!("FPS: {}", get_fps()), 20.0, 20.0, 20.0, WHITE);
-        draw_text(&format!("Word: {}", self.current), 20.0, 40.0, 20.0, WHITE);
-        draw_text(
-            &format!("Words: {}", self.words.len()),
-            20.0,
-            60.0,
-            20.0,
-            WHITE,
-        );
+        if state.show_debug {
+            draw_text(&format!("Word: {}", self.current), 20.0, 80.0, 20.0, WHITE);
+            draw_text(
+                &format!("Words: {}", self.words.len()),
+                20.0,
+                100.0,
+                20.0,
+                WHITE,
+            );
+        }
     }
 
     fn handle_mouse_click(&mut self, state: &State) {

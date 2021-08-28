@@ -23,7 +23,6 @@ async fn main() {
     let mut animation = Animation::new_word_chaos(&state);
 
     loop {
-        //println!("FPS: {}", get_fps());
         clear_background(BLACK);
 
         // We're cycling through animations, only one can run at a time.
@@ -40,7 +39,15 @@ async fn main() {
                 inner.update(&state);
                 inner.draw(&state);
             }
+            Animation::Snake(ref mut inner) => {
+                for instance in inner.iter_mut() {
+                    instance.update();
+                    instance.draw();
+                }
+            }
         }
+
+        state.draw();
 
         if let Some(next_animation) = state.update(&mut animation) {
             animation = next_animation;

@@ -499,7 +499,16 @@ dependencies = [
  "better-panic",
  "log",
  "macroquad",
+ "roflcopter 0.1.0 (git+https://github.com/hildebro/roflcopter.git?branch=master)",
  "simplelog",
+]
+
+[[package]]
+name = "roflcopter"
+version = "0.1.0"
+source = "git+https://github.com/hildebro/roflcopter.git?branch=master#7de3bb7369966d316065dbf052d52e0e47d6293f"
+dependencies = [
+ "macroquad",
 ]
 
 [[package]]

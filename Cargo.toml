@@ -10,3 +10,5 @@ macroquad = "0.3"
 log = "0.4"
 simplelog = { version = "0.10", default-features = false }
 better-panic = "0.2"
+
+roflcopter = { git = "https://github.com/hildebro/roflcopter.git", branch = "master" }

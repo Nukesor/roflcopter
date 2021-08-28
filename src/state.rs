@@ -34,6 +34,12 @@ pub struct State {
     /// For each character of the word, a color will be assigned.
     pub colors: Vec<Color>,
 
+    /// Whether it's time to skip the current animation.
+    pub show_debug: bool,
+    /// Whether it's time to skip the current animation.
+    skip_animation: bool,
+    halt_animation_changes: bool,
+
     /// The total time of the duration and current animation length.
     pub animation_duration: Duration,
     pub animation_timer: Duration,
@@ -83,9 +89,13 @@ impl State {
             font_dimensions,
             colors,
 
-            animation_duration,
+            show_debug: false,
+            skip_animation: false,
+            halt_animation_changes: false,
 
+            animation_duration,
             animation_timer,
+
             transition_duration: Duration::from_secs(2),
             transition,
             black_screen: Texture2D::empty(),
@@ -101,12 +111,15 @@ impl State {
         // Check if the window has been resized and update stuff accordingly.
         self.handle_window_resize(animation);
         self.handle_mouse_update(animation);
+        self.handle_key_presses();
 
         let mut next_animation: Option<Animation> = None;
         let delta_time = delta_duration();
 
-        // Tick the timer for the current animation.
-        self.animation_timer = self.animation_timer.add(delta_time);
+        if !self.halt_animation_changes {
+            // Tick the timer for the current animation.
+            self.animation_timer = self.animation_timer.add(delta_time);
+        }
 
         // There's currently a transition running. Tick it
         if let Some(ref mut transition) = self.transition {
@@ -126,14 +139,22 @@ impl State {
 
         // The current transition has finished and the transition animation is done.
         if self.animation_timer > self.animation_duration.add(self.transition_duration * 2) {
+            self.skip_animation = true;
+        }
+
+        // Switch to the next animation.
+        if self.skip_animation {
             next_animation = Some(match animation {
                 Animation::Wall(_) => Animation::new_copter(
                     self,
                     Vec2::new(self.window_width / 2.0, self.window_height / 2.0),
                 ),
                 Animation::Copter(_) => Animation::new_word_chaos(self),
-                Animation::WordChaos(_) => Animation::new_wall(),
+                Animation::WordChaos(_) => Animation::new_snake(),
+                Animation::Snake(_) => Animation::new_wall(),
             });
+
+            self.skip_animation = false;
             self.animation_timer = Duration::from_secs(0);
             self.animation_duration = Duration::from_secs(gen_range(8, 15));
 
@@ -141,10 +162,30 @@ impl State {
             self.transition = Some(Transition {
                 timer: Duration::from_secs(0),
                 phase: Phase::In,
-            })
+            });
         }
 
         next_animation
+    }
+
+    pub fn draw(&self) {
+        if self.show_debug {
+            draw_text(&format!("FPS: {}", get_fps()), 20.0, 20.0, 20.0, WHITE);
+            draw_text(
+                &format!("Duration: {:?}", self.animation_duration),
+                20.0,
+                40.0,
+                20.0,
+                WHITE,
+            );
+            draw_text(
+                &format!("Timer: {:?}", self.animation_timer),
+                20.0,
+                60.0,
+                20.0,
+                WHITE,
+            );
+        }
     }
 
     pub fn handle_mouse_update(&mut self, animation: &mut Animation) {
@@ -203,6 +244,32 @@ impl State {
                 Animation::Wall(_) => {}
                 Animation::Copter(inner) => inner.copter_images.update(self),
                 Animation::WordChaos(inner) => inner.update_texture(&self),
+                Animation::Snake(_) => {}
+            }
+        }
+    }
+
+    fn handle_key_presses(&mut self) {
+        if is_key_pressed(macroquad::prelude::KeyCode::D) {
+            self.show_debug = !self.show_debug;
+        }
+        if is_key_pressed(macroquad::prelude::KeyCode::S) {
+            self.skip_animation = true;
+        }
+
+        // Halt animations switches with H
+        if is_key_pressed(macroquad::prelude::KeyCode::H) {
+            self.halt_animation_changes = !self.halt_animation_changes;
+        }
+
+        // Change the animation duration by one sec
+        if is_key_pressed(macroquad::prelude::KeyCode::K) {
+            self.animation_duration = self.animation_duration + Duration::from_secs(1);
+        }
+        if is_key_pressed(macroquad::prelude::KeyCode::J) {
+            self.animation_duration = self.animation_duration - Duration::from_secs(1);
+            if self.animation_duration < Duration::from_secs(2) {
+                self.animation_duration = Duration::from_secs(2);
             }
         }
     }

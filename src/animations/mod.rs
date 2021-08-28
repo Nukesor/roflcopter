@@ -6,17 +6,18 @@ pub mod word_chaos;
 pub use copter::*;
 pub use helper::*;
 use macroquad::prelude::Vec2;
+use roflcopter_lib::game_state::GameState;
 pub use wall::WallAnimation;
 
 use crate::state::State;
 
 use self::word_chaos::WordChaosAnimation;
 
-#[derive(Debug, Clone)]
 pub enum Animation {
     Wall(WallAnimation),
     Copter(CopterAnimation),
     WordChaos(WordChaosAnimation),
+    Snake(Vec<GameState>),
 }
 
 impl Animation {
@@ -29,5 +30,13 @@ impl Animation {
     }
     pub fn new_word_chaos(state: &State) -> Animation {
         Animation::WordChaos(WordChaosAnimation::new(state))
+    }
+
+    pub fn new_snake() -> Animation {
+        let mut instances = Vec::new();
+        for _ in 0..1000 {
+            instances.push(GameState::new())
+        }
+        Animation::Snake(instances)
     }
 }
