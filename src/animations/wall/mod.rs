@@ -8,8 +8,8 @@ mod shader;
 
 #[derive(Debug, Clone)]
 pub struct WallAnimation {
-    pub y_offset: f32,
-    pub x_offset: f32,
+    y_offset: f32,
+    x_offset: f32,
 }
 
 impl WallAnimation {

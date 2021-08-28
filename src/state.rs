@@ -4,7 +4,7 @@ use macroquad::{prelude::*, rand::ChooseRandom};
 
 use crate::{
     animations::{
-        helper::{delta_duration, direction, Direction},
+        helper::{delta_duration, side, Side},
         Animation, CopterState,
     },
     color,
@@ -243,9 +243,9 @@ impl State {
                     ..
                 } => {
                     let dimensions = copter.copter_images.copter_dimensions();
-                    let new_dest = match direction(position, &dest) {
-                        Direction::Left => Vec2::new(x, y - dimensions.1 / 2.0),
-                        Direction::Right => Vec2::new(x - dimensions.0, y - dimensions.1 / 2.0),
+                    let new_dest = match side(position, &dest) {
+                        Side::Left => Vec2::new(x, y - dimensions.1 / 2.0),
+                        Side::Right => Vec2::new(x - dimensions.0, y - dimensions.1 / 2.0),
                     };
                     *dest = new_dest;
                 }

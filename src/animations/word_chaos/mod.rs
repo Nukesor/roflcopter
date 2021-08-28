@@ -2,16 +2,8 @@ use std::{collections::HashMap, f32::consts::PI, time::Duration};
 
 use macroquad::{prelude::*, rand::gen_range};
 
-use crate::{animations::helper::*, state::State};
-
 use super::helper::{delta_duration, rotate_vec2};
-
-pub enum Collision {
-    Top,
-    Left,
-    Bottom,
-    Right,
-}
+use crate::{animations::helper::*, state::State};
 
 #[derive(Debug, Clone)]
 pub struct Word {
@@ -43,14 +35,14 @@ impl Word {
 
 #[derive(Debug, Clone)]
 pub struct WordChaosAnimation {
-    pub words: Vec<Word>,
-    pub word_limit: usize,
-    pub current: String,
-    pub texture_map: HashMap<u16, Texture2D>,
+    words: Vec<Word>,
+    word_limit: usize,
+    current: String,
+    texture_map: HashMap<u16, Texture2D>,
 
-    pub spawn_timeout: Duration,
-    pub spawn_timer: Duration,
-    pub font_size: u16,
+    spawn_timeout: Duration,
+    spawn_timer: Duration,
+    font_size: u16,
 }
 
 impl WordChaosAnimation {
@@ -153,19 +145,19 @@ impl WordChaosAnimation {
                     word.acceleration = word.acceleration * gen_range(1.1, 1.2);
 
                     match collision {
-                        Collision::Right => {
+                        Direction::Right => {
                             word.set_x_from_mid(state, state.window_width - 1.0);
                             word.acceleration.x = -word.acceleration.x;
                         }
-                        Collision::Left => {
+                        Direction::Left => {
                             word.set_x_from_mid(state, 2.0);
                             word.acceleration.x = -word.acceleration.x;
                         }
-                        Collision::Bottom => {
+                        Direction::Bottom => {
                             word.set_y_from_mid(state, state.window_height - 1.0);
                             word.acceleration.y = -word.acceleration.y;
                         }
-                        Collision::Top => {
+                        Direction::Top => {
                             word.set_y_from_mid(state, 1.0);
                             word.acceleration.y = -word.acceleration.y;
                         }
@@ -234,16 +226,16 @@ impl WordChaosAnimation {
     }
 }
 
-fn detect_collision(middle: Vec2, state: &State) -> Option<Collision> {
+fn detect_collision(middle: Vec2, state: &State) -> Option<Direction> {
     // Check collisions on all sides
     if middle.x > state.window_width + 1.0 {
-        return Some(Collision::Right);
+        return Some(Direction::Right);
     } else if middle.x < -1.0 {
-        return Some(Collision::Left);
+        return Some(Direction::Left);
     } else if middle.y > state.window_height + 1.0 {
-        return Some(Collision::Bottom);
+        return Some(Direction::Bottom);
     } else if middle.y < -1.0 {
-        return Some(Collision::Top);
+        return Some(Direction::Top);
     }
 
     None

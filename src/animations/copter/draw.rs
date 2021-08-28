@@ -1,14 +1,14 @@
 use macroquad::prelude::*;
 
 use super::{CopterImages, Shot};
-use crate::{animations::helper::Direction, state::State};
+use crate::{animations::helper::Side, state::State};
 
 /// Lower level helicopter drawing call.
 /// This is a simple wrapper around some of macroquads drawing logic.
 pub fn draw_copter(
     images: &CopterImages,
-    copter_direction: &Direction,
-    rotor_direction: &Direction,
+    copter_direction: &Side,
+    rotor_direction: &Side,
     x: f32,
     y: f32,
     rotation: f32,
@@ -31,11 +31,7 @@ pub fn draw_copter(
 /// Once this is done, we create a image from that data.
 ///
 /// That raw pre-compiled image can then be re-used for the rest of the animation.
-pub fn draw_raw_copter(
-    state: &State,
-    copter_direction: Direction,
-    rotor_direction: Direction,
-) -> Texture2D {
+pub fn draw_raw_copter(state: &State, copter_direction: Side, rotor_direction: Side) -> Texture2D {
     clear_background(Color::from_rgba(0, 0, 0, 0));
     let mut x: f32;
     let mut y: f32 = 0.0;
@@ -94,10 +90,10 @@ pub fn draw_raw_copter(
 }
 
 /// Get the correct ascii art, depending on the copter direction and rotor orientation.
-fn get_ascii_art(rotor_direction: &Direction, copter_direction: &Direction) -> String {
+fn get_ascii_art(rotor_direction: &Side, copter_direction: &Side) -> String {
     match copter_direction {
-        Direction::Right => match rotor_direction {
-            Direction::Left => "
+        Side::Right => match rotor_direction {
+            Side::Left => "
    LFOR:LFOR:
          ___^___ _
  L    __/      [] \\
@@ -106,7 +102,7 @@ LOL===__           \\
             I   I
           ----------/"
                 .to_string(),
-            Direction::Right => "
+            Side::Right => "
             :ROFL:ROFL
          ___^___ _
 L L   __/      [] \\
@@ -116,8 +112,8 @@ L L     \\___ ___ ___]
           ----------/"
                 .to_string(),
         },
-        Direction::Left => match rotor_direction {
-            Direction::Left => "
+        Side::Left => match rotor_direction {
+            Side::Left => "
 ROFL:ROFL:
     _ ___^___
    / []      \\__    L
@@ -126,7 +122,7 @@ ROFL:ROFL:
       I   I
  \\----------          "
                 .to_string(),
-            Direction::Right => "
+            Side::Right => "
          :LFOR:LFOR
     _ ___^___
    / []      \\__   L L
@@ -143,8 +139,8 @@ ROFL:ROFL:
 /// This is a simple wrapper around some of macroquads drawing logic.
 pub fn draw_shot(images: &CopterImages, shot: &Shot) {
     let flip_x = match shot.direction {
-        Direction::Left => true,
-        Direction::Right => false,
+        Side::Left => true,
+        Side::Right => false,
     };
 
     draw_texture_ex(

@@ -1,11 +1,21 @@
 use std::{collections::HashMap, f32::consts::PI, time::Duration};
 
-use macroquad::{prelude::*, rand::gen_range};
+use macroquad::{
+    prelude::*,
+    rand::{gen_range, ChooseRandom},
+};
 
 use crate::state::State;
 
-#[derive(Debug, Clone)]
 pub enum Direction {
+    Top,
+    Left,
+    Bottom,
+    Right,
+}
+
+#[derive(Debug, Clone)]
+pub enum Side {
     Left,
     Right,
 }
@@ -15,11 +25,11 @@ pub fn delta_duration() -> Duration {
     Duration::from_micros(dt)
 }
 
-pub fn direction(src: &Vec2, dest: &Vec2) -> Direction {
+pub fn side(src: &Vec2, dest: &Vec2) -> Side {
     if src.x > dest.x {
-        Direction::Left
+        Side::Left
     } else {
-        Direction::Right
+        Side::Right
     }
 }
 
@@ -41,6 +51,30 @@ pub fn random_position_on_screen(state: &State) -> Vec2 {
         gen_range(100.0, state.window_width - 100.0),
         gen_range(100.0, state.window_height - 100.0),
     )
+}
+
+pub fn random_position_outside_screen(state: &State) -> Vec2 {
+    let mut position = Vec2::new(
+        gen_range(0.0, state.window_width),
+        gen_range(0.0, state.window_height),
+    );
+
+    let directions = vec![
+        Direction::Top,
+        Direction::Bottom,
+        Direction::Left,
+        Direction::Right,
+    ];
+    let direction = directions.choose().expect("Failed to get random direction");
+
+    match direction {
+        Direction::Top => position.y = -100.0,
+        Direction::Bottom => position.y = state.window_height + 100.0,
+        Direction::Left => position.x = -100.0,
+        Direction::Right => position.x = state.window_width + 100.0,
+    }
+
+    position
 }
 
 pub fn rotate_vec2(vec: Vec2, angle: f32) -> Vec2 {
