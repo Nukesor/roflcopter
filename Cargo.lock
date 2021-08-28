@@ -506,7 +506,7 @@ dependencies = [
 [[package]]
 name = "roflcopter_snake"
 version = "0.1.0"
-source = "git+https://github.com/hildebro/roflcopter.git?branch=master#4cf875da5ac32541410b3ac153a9977cd475b58d"
+source = "git+https://github.com/hildebro/roflcopter.git?branch=master#56134cd605e2407d4e60de61aa334b816c579af6"
 dependencies = [
  "macroquad",
 ]
