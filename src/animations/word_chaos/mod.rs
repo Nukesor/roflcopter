@@ -127,34 +127,7 @@ impl WordChaosAnimation {
 
             let collision = detect_collision(middle, state);
 
-            if let Some(collision) = collision {
-                // Update the word's acceleration
-                match collision {
-                    Collision::Right => {
-                        word.set_x_from_mid(state, state.window_width - 1.0);
-                        word.acceleration.x = -word.acceleration.x;
-                    }
-                    Collision::Left => {
-                        word.set_x_from_mid(state, 1.0);
-                        word.acceleration.x = -word.acceleration.x;
-                    }
-                    Collision::Bottom => {
-                        word.set_y_from_mid(state, state.window_height - 1.0);
-                        word.acceleration.y = -word.acceleration.y;
-                    }
-                    Collision::Top => {
-                        word.set_y_from_mid(state, 1.0);
-                        word.acceleration.y = -word.acceleration.y;
-                    }
-                }
-
-                // Make the word spin faster.
-                word.angle_rotation *= gen_range(1.1, 1.4);
-
-                // Slightly change acceleration
-                word.acceleration = rotate_vec2(word.acceleration, gen_range(0.1, 0.4));
-                word.acceleration = word.acceleration * gen_range(1.1, 1.2);
-
+            if let Some(collision) = &collision {
                 // If the word is gone, schedule it for removal.
                 // Otherwise, split it and spawn new ones.
                 if word.length == 1 {
@@ -163,9 +136,36 @@ impl WordChaosAnimation {
                     word.length -= 1;
 
                     if (current_words + new_words.len()) < 1000 {
-                        let mut new_word = get_new_word(&word, collision);
+                        let mut new_word = get_new_word(state, &word);
                         new_word.font_size = font_sizes[gen_range(0, font_sizes.len() - 1)];
                         new_words.push(new_word);
+                    }
+
+                    // Update the word's acceleration
+                    // Make the word spin faster.
+                    word.angle_rotation *= gen_range(1.1, 1.4);
+
+                    // Slightly change acceleration
+                    word.acceleration = rotate_vec2(word.acceleration, gen_range(0.1, 0.4));
+                    word.acceleration = word.acceleration * gen_range(1.1, 1.2);
+
+                    match collision {
+                        Collision::Right => {
+                            word.set_x_from_mid(state, state.window_width - 1.0);
+                            word.acceleration.x = -word.acceleration.x;
+                        }
+                        Collision::Left => {
+                            word.set_x_from_mid(state, 2.0);
+                            word.acceleration.x = -word.acceleration.x;
+                        }
+                        Collision::Bottom => {
+                            word.set_y_from_mid(state, state.window_height - 1.0);
+                            word.acceleration.y = -word.acceleration.y;
+                        }
+                        Collision::Top => {
+                            word.set_y_from_mid(state, 1.0);
+                            word.acceleration.y = -word.acceleration.y;
+                        }
                     }
                 }
             }
@@ -244,25 +244,26 @@ fn detect_collision(middle: Vec2, state: &State) -> Option<Collision> {
     None
 }
 
-fn get_new_word(word: &Word, collision: Collision) -> Word {
+fn get_new_word(state: &State, word: &Word) -> Word {
     let mut new_word = Word { ..word.clone() };
     new_word.acceleration.x = new_word.acceleration.x * gen_range(1.1, 1.3);
     new_word.acceleration.y = new_word.acceleration.y * gen_range(1.1, 1.3);
 
-    match collision {
-        Collision::Top => {
-            new_word.acceleration.x = -1.0 * new_word.acceleration.x;
-        }
-        Collision::Bottom => {
-            new_word.acceleration.x = -1.0 * new_word.acceleration.x;
-        }
-        Collision::Left => {
-            new_word.acceleration.y = -1.0 * new_word.acceleration.y;
-        }
-        Collision::Right => {
-            new_word.acceleration.y = -1.0 * new_word.acceleration.y;
-        }
+    new_word.acceleration = rotate_vec2(new_word.acceleration, PI);
+
+    // Handle position out of bounds sides
+    let middle = new_word.mid_position(state);
+    if middle.x <= 0.0 {
+        new_word.set_x_from_mid(state, 2.0);
+    } else if middle.x >= state.window_width {
+        new_word.set_x_from_mid(state, state.window_width - 1.0);
     }
+    if middle.y <= 0.0 {
+        new_word.set_y_from_mid(state, 1.0);
+    } else if middle.y >= state.window_height {
+        new_word.set_y_from_mid(state, state.window_height - 1.0);
+    }
+
     new_word.color = random_color();
 
     new_word
