@@ -51,10 +51,8 @@ async fn main() {
                 inner.draw(&state);
             }
             Animation::Snake(ref mut inner) => {
-                for instance in inner.iter_mut() {
-                    instance.update();
-                    instance.draw();
-                }
+                inner.update();
+                inner.draw();
             }
         }
 
