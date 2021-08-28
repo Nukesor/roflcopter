@@ -144,13 +144,10 @@ impl State {
         // Switch to the next animation.
         if self.skip_animation {
             next_animation = Some(match animation {
-                Animation::Wall(_) => Animation::new_copter(
-                    self,
-                    Vec2::new(self.window_width / 2.0, self.window_height / 2.0),
-                ),
+                Animation::Wall(_) => Animation::new_copter(self),
                 Animation::Copter(_) => Animation::new_word_chaos(self),
                 Animation::WordChaos(_) => Animation::new_snake(),
-                Animation::Snake(_) => Animation::new_wall(),
+                Animation::Snake(_) => Animation::new_copter(self),
             });
 
             self.skip_animation = false;
@@ -190,8 +187,6 @@ impl State {
                 },
             )
         }
-
-
 
         if self.show_debug {
             draw_text(&format!("FPS: {}", get_fps()), 20.0, 20.0, 20.0, WHITE);

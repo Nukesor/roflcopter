@@ -21,7 +21,8 @@ pub enum Animation {
 }
 
 impl Animation {
-    pub fn new_copter(state: &State, position: Vec2) -> Animation {
+    pub fn new_copter(state: &State) -> Animation {
+        let position = Vec2::new(state.window_width / 2.0, state.window_height / 2.0);
         Animation::Copter(CopterAnimation::new(state, position))
     }
 

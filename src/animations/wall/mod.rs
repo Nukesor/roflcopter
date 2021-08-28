@@ -70,6 +70,25 @@ impl WallAnimation {
             used_height += state.font_dimensions.height;
         }
 
+        let ultra_rofl_size = (state.window_width / 5.0) as u16;
+        let word_size = measure_text("ROFL", Some(state.font), ultra_rofl_size, 1.0);
+        let mut ultra_rofl_position =
+            Vec2::new(state.window_width / 2.0, state.window_height / 2.0);
+        ultra_rofl_position.x -= word_size.width / 2.0;
+
+        draw_text_ex(
+            "ROFL",
+            ultra_rofl_position.x,
+            ultra_rofl_position.y,
+            TextParams {
+                font: state.font,
+                font_size: ultra_rofl_size,
+                font_scale: 1.0,
+                color: BLACK,
+                ..Default::default()
+            },
+        );
+
         shader::draw_shader(state);
     }
 
