@@ -1,6 +1,6 @@
-use std::{ops::Add, time::Duration};
+use std::{fs::read_to_string, ops::Add, path::Path, time::Duration};
 
-use macroquad::prelude::*;
+use macroquad::{prelude::*, rand::ChooseRandom};
 
 use crate::{
     animations::{
@@ -32,6 +32,9 @@ pub struct State {
     pub font_dimensions: TextDimensions,
     /// For each character of the word, a color will be assigned.
     pub colors: Vec<Color>,
+
+    /// A wordlist of random words that can be picked.
+    pub wordlist: Vec<String>,
 
     /// Whether it's time to skip the current animation.
     pub show_debug: bool,
@@ -71,6 +74,13 @@ impl State {
         let mut colors = color::create_colors();
         colors.truncate(word.len());
 
+        let mut wordlist = vec![word.clone()];
+        let wordlist_path = Path::new("./wordlist.txt");
+        if wordlist_path.exists() {
+            let content = read_to_string(wordlist_path).expect("Failed while reading wordlist.");
+            wordlist = content.split('\n').map(|word| word.to_owned()).collect();
+        }
+
         //let animation_duration = Duration::from_secs(gen_range(10, 25));
         let animation_duration = Duration::from_secs(40);
         let animation_timer = Duration::from_secs(0);
@@ -87,6 +97,8 @@ impl State {
             font_size,
             font_dimensions,
             colors,
+
+            wordlist,
 
             show_debug: false,
             skip_animation: false,
@@ -297,5 +309,12 @@ impl State {
         clear_background(BLACK);
         let image = get_screen_data();
         self.black_screen = Texture2D::from_image(&image);
+    }
+
+    pub fn random_word(&self) -> String {
+        self.wordlist
+            .choose()
+            .expect("Failed to get random word")
+            .clone()
     }
 }

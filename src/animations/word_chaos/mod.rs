@@ -54,7 +54,7 @@ pub struct WordChaosAnimation {
 
 impl WordChaosAnimation {
     pub fn new(state: &State) -> WordChaosAnimation {
-        let word = "Roflcopter".to_owned();
+        let word = state.random_word();
         let font_size = (state.font_size as f32 * 1.5) as u16;
         let textures = textures_from_text(state, &word, false, font_size);
 
@@ -77,18 +77,18 @@ impl WordChaosAnimation {
     }
 
     /// Restart the animation, with a new word.
-    pub fn next_word(&mut self, state: &State, word: &str) {
+    pub fn next_word(&mut self, state: &State) {
+        self.current = state.random_word();
         self.words = vec![Word {
             position: random_position_on_screen(state),
             acceleration: random_vector_with_lenght(gen_range(200.0, 400.0)),
-            length: word.len(),
+            length: self.current.len(),
             color: random_color(),
             angle: gen_range(0.0, 2.0 * PI),
             angle_rotation: gen_range(0.1, 0.2),
             font_size: self.font_size,
         }];
-        self.texture_map = textures_from_text(state, &word, false, self.font_size);
-        self.current = word.to_owned();
+        self.texture_map = textures_from_text(state, &self.current, false, self.font_size);
     }
 
     /// Restart the animation, with a new word.
@@ -179,7 +179,7 @@ impl WordChaosAnimation {
         self.words.append(&mut new_words);
 
         if self.words.is_empty() {
-            self.next_word(state, "Roflcopter");
+            self.next_word(state);
         }
     }
 
