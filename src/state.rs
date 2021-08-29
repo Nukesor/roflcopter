@@ -240,7 +240,7 @@ impl State {
                     ref position,
                     ..
                 } => {
-                    let dimensions = copter.copter_images.copter_dimensions();
+                    let dimensions = copter.textures.copter_dimensions();
                     let new_dest = match side(position, &dest) {
                         Side::Left => Vec2::new(x, y - dimensions.y / 2.0),
                         Side::Right => Vec2::new(x - dimensions.x, y - dimensions.y / 2.0),
@@ -271,7 +271,7 @@ impl State {
 
             match animation {
                 Animation::Wall(_) => {}
-                Animation::Copter(inner) => inner.copter_images.update(self),
+                Animation::Copter(inner) => inner.textures.update(self),
                 Animation::WordChaos(inner) => inner.update_texture(&self),
                 Animation::Snake(_) => {}
             }

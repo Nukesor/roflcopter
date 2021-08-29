@@ -61,7 +61,7 @@ impl CopterAnimation {
         for enemy in self.enemies.iter() {
             let direction = copter_position - enemy.position;
             draw_texture_ex(
-                self.enemy_texture,
+                self.textures.enemy,
                 enemy.position.x,
                 enemy.position.y,
                 RED,

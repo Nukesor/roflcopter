@@ -5,22 +5,28 @@ use crate::{helper::*, state::State};
 
 /// A struct used to store dynamically generated images of the roflcopter.
 #[derive(Debug, Clone)]
-pub struct CopterImages {
+pub struct Textures {
     pub right_copter_right_rotor: Texture2D,
     pub right_copter_left_rotor: Texture2D,
     pub left_copter_right_rotor: Texture2D,
     pub left_copter_left_rotor: Texture2D,
     pub shot: Texture2D,
+    pub enemy: Texture2D,
 }
 
-impl CopterImages {
-    pub fn new(state: &State) -> CopterImages {
-        CopterImages {
+impl Textures {
+    pub fn new(state: &State) -> Textures {
+        let enemy = " ┍─
+-╪═══>
+ ┕─";
+
+        Textures {
             right_copter_right_rotor: generate_copter_texture(state, Side::Right, Side::Right),
             right_copter_left_rotor: generate_copter_texture(state, Side::Right, Side::Left),
             left_copter_right_rotor: generate_copter_texture(state, Side::Left, Side::Right),
             left_copter_left_rotor: generate_copter_texture(state, Side::Left, Side::Left),
-            shot: texture_from_text(state, &state.word, state.font_size, Some(&state.colors)),
+            shot: texture_from_text(state, "<=", state.font_size, None),
+            enemy: texture_from_text(state, enemy, state.font_size, None),
         }
     }
 

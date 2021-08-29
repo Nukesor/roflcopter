@@ -76,7 +76,7 @@ impl CopterAnimation {
                 let height = state.window_height;
                 let width = state.window_width;
 
-                let dimensions = self.copter_images.copter_dimensions();
+                let dimensions = self.textures.copter_dimensions();
 
                 self.copter_state = CopterState::Flying {
                     position: position.clone(),
@@ -104,7 +104,7 @@ impl CopterAnimation {
                 };
 
                 draw_copter(
-                    &self.copter_images,
+                    &self.textures,
                     &copter_direction,
                     &self.rotor_direction,
                     position.x,
@@ -128,7 +128,7 @@ impl CopterAnimation {
                 let y = position.y + offset * state.font_dimensions.height;
 
                 draw_copter(
-                    &self.copter_images,
+                    &self.textures,
                     copter_direction,
                     &self.rotor_direction,
                     x,

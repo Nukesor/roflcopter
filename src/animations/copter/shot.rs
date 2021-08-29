@@ -36,7 +36,7 @@ impl CopterAnimation {
             }
 
             // Check if the shot left the image and can be removed
-            let text_width = self.copter_images.shot.width();
+            let text_width = self.textures.shot.width();
             if shot.position.x > state.window_width
                 || shot.position.x < 0.0 - text_width
                 || shot.position.y > state.window_height + text_width
@@ -95,10 +95,9 @@ impl CopterAnimation {
 
     /// Spawn a new shot depending on the current position and copter state.
     pub fn spawn_shot(&mut self, dest: Vec2) {
-        let dimensions = self.copter_images.copter_dimensions();
+        let dimensions = self.textures.copter_dimensions();
         // Calculate the middle of the copter.
-        let middle =
-            middle_texture_position(self.get_copter_position(), self.copter_images.texture());
+        let middle = middle_texture_position(self.get_copter_position(), self.textures.texture());
 
         match self.copter_state {
             CopterState::Flying { .. } => {

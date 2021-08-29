@@ -17,12 +17,12 @@ use crate::state::State;
 
 #[derive(Debug, Clone)]
 pub struct CopterAnimation {
+    pub textures: Textures,
+
+    pub copter_state: CopterState,
     rotor_direction: Side,
     rotor_duration: Duration,
     rotor_timer: Duration,
-
-    pub copter_images: CopterImages,
-    pub copter_state: CopterState,
 
     shot_timeout: Duration,
     shot_timer: Duration,
@@ -31,7 +31,6 @@ pub struct CopterAnimation {
     enemies: Vec<Enemy>,
     spawn_enemies: bool,
     enemy_speed: f32,
-    enemy_texture: Texture2D,
     enemy_timer: Duration,
     enemy_duration: Duration,
 }
@@ -62,7 +61,7 @@ impl CopterAnimation {
             rotor_duration: Duration::from_millis(200),
             rotor_timer: Duration::from_secs(0),
 
-            copter_images: CopterImages::new(state),
+            textures: Textures::new(state),
             copter_state,
 
             shot_timeout: Duration::from_millis(110),
@@ -70,8 +69,7 @@ impl CopterAnimation {
             shots: vec![],
 
             enemies: vec![],
-            spawn_enemies: false,
-            enemy_texture: texture_from_text(state, "HURENSOHN", state.font_size, None),
+            spawn_enemies: true,
             enemy_speed: state.window_width / 20.0,
             enemy_duration: Duration::from_millis(100),
             enemy_timer: Duration::from_secs(0),
@@ -89,7 +87,7 @@ impl CopterAnimation {
     /// Draw the copter depending on the current animation state.
     pub fn draw(&self, state: &State) {
         for shot in self.shots.iter() {
-            draw_shot(&self.copter_images, shot);
+            draw_shot(&self.textures, shot);
         }
 
         self.draw_enemies();

@@ -1,12 +1,12 @@
 use macroquad::prelude::*;
 
-use super::{CopterImages, Shot};
+use super::{Shot, Textures};
 use crate::{helper::*, state::State};
 
 /// Lower level helicopter drawing call.
 /// This is a simple wrapper around some of macroquads drawing logic.
 pub fn draw_copter(
-    images: &CopterImages,
+    images: &Textures,
     copter_direction: &Side,
     rotor_direction: &Side,
     x: f32,
@@ -42,8 +42,7 @@ pub fn generate_copter_texture(
 fn get_ascii_art(rotor_direction: &Side, copter_direction: &Side) -> String {
     match copter_direction {
         Side::Right => match rotor_direction {
-            Side::Left => "
-   LFOR:LFOR:
+            Side::Left => "   LFOR:LFOR:
          ___^___ _
  L    __/      [] \\
 LOL===__           \\
@@ -51,8 +50,7 @@ LOL===__           \\
             I   I
           ----------/"
                 .to_string(),
-            Side::Right => "
-            :ROFL:ROFL
+            Side::Right => "            :ROFL:ROFL
          ___^___ _
 L L   __/      [] \\
  O ===__           \\
@@ -62,8 +60,7 @@ L L     \\___ ___ ___]
                 .to_string(),
         },
         Side::Left => match rotor_direction {
-            Side::Left => "
-ROFL:ROFL:
+            Side::Left => "ROFL:ROFL:
     _ ___^___
    / []      \\__    L
   /           __===LOL
@@ -71,8 +68,7 @@ ROFL:ROFL:
       I   I
  \\----------          "
                 .to_string(),
-            Side::Right => "
-         :LFOR:LFOR
+            Side::Right => "         :LFOR:LFOR
     _ ___^___
    / []      \\__   L L
   /           __=== O
@@ -86,7 +82,7 @@ ROFL:ROFL:
 
 /// Lower level helicopter drawing call.
 /// This is a simple wrapper around some of macroquads drawing logic.
-pub fn draw_shot(images: &CopterImages, shot: &Shot) {
+pub fn draw_shot(images: &Textures, shot: &Shot) {
     let flip_x = match shot.direction {
         Side::Left => true,
         Side::Right => false,
