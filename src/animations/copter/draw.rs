@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use super::{Shot, Textures};
+use super::Textures;
 use crate::{helper::*, state::State};
 
 /// Lower level helicopter drawing call.
@@ -78,26 +78,4 @@ L L     \\___ ___ ___]
                 .to_string(),
         },
     }
-}
-
-/// Lower level helicopter drawing call.
-/// This is a simple wrapper around some of macroquads drawing logic.
-pub fn draw_shot(images: &Textures, shot: &Shot) {
-    let flip_x = match shot.direction {
-        Side::Left => true,
-        Side::Right => false,
-    };
-
-    draw_texture_ex(
-        images.shot,
-        shot.position.x,
-        shot.position.y,
-        Color::from_rgba(255, 255, 255, 255),
-        DrawTextureParams {
-            rotation: shot.angle,
-            flip_y: true,
-            flip_x,
-            ..Default::default()
-        },
-    )
 }

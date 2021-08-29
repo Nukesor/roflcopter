@@ -120,7 +120,7 @@ impl WordChaosAnimation {
             word.position = word.position + word.acceleration * dt;
             let middle = word.mid_position(state);
 
-            let collision = detect_collision(middle, state);
+            let collision = outside_screen(state, middle);
 
             if let Some(collision) = &collision {
                 // If the word is gone, schedule it for removal.
@@ -224,21 +224,6 @@ impl WordChaosAnimation {
             self.spawn_timer = Duration::from_secs(0);
         }
     }
-}
-
-fn detect_collision(middle: Vec2, state: &State) -> Option<Direction> {
-    // Check collisions on all sides
-    if middle.x > state.window_width + 1.0 {
-        return Some(Direction::Right);
-    } else if middle.x < -1.0 {
-        return Some(Direction::Left);
-    } else if middle.y > state.window_height + 1.0 {
-        return Some(Direction::Bottom);
-    } else if middle.y < -1.0 {
-        return Some(Direction::Top);
-    }
-
-    None
 }
 
 fn get_new_word(state: &State, word: &Word, max_speed: f32) -> Word {

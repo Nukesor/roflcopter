@@ -8,7 +8,6 @@ mod enemy;
 mod images;
 mod shot;
 
-use self::draw::*;
 use self::enemy::*;
 use self::images::*;
 use self::shot::*;
@@ -31,8 +30,10 @@ pub struct CopterAnimation {
     enemies: Vec<Enemy>,
     spawn_enemies: bool,
     enemy_speed: f32,
-    enemy_timer: Duration,
-    enemy_duration: Duration,
+    enemy_max_health: usize,
+    enemy_wave_size: usize,
+    enemy_wave_timeout: Duration,
+    enemy_wave_timer: Duration,
 }
 
 #[derive(Debug, Clone)]
@@ -64,15 +65,17 @@ impl CopterAnimation {
             textures: Textures::new(state),
             copter_state,
 
-            shot_timeout: Duration::from_millis(110),
+            shot_timeout: Duration::from_millis(300),
             shot_timer: Duration::from_secs(0),
             shots: vec![],
 
             enemies: vec![],
             spawn_enemies: true,
             enemy_speed: state.window_width / 20.0,
-            enemy_duration: Duration::from_millis(100),
-            enemy_timer: Duration::from_secs(0),
+            enemy_max_health: 3,
+            enemy_wave_size: 12,
+            enemy_wave_timeout: Duration::from_secs(10),
+            enemy_wave_timer: Duration::from_secs(0),
         }
     }
 
@@ -86,10 +89,7 @@ impl CopterAnimation {
 
     /// Draw the copter depending on the current animation state.
     pub fn draw(&self, state: &State) {
-        for shot in self.shots.iter() {
-            draw_shot(&self.textures, shot);
-        }
-
+        self.draw_shots();
         self.draw_enemies();
         self.draw_copter(state);
     }

@@ -33,7 +33,9 @@ pub fn random_position_on_screen(state: &State) -> Vec2 {
     )
 }
 
-pub fn random_position_outside_screen(state: &State) -> Vec2 {
+/// Return a random position at the edges of the screen.
+/// The position can be offset by a given amount.
+pub fn random_position_outside_screen(state: &State, offset: f32) -> Vec2 {
     let mut position = Vec2::new(
         gen_range(0.0, state.window_width),
         gen_range(0.0, state.window_height),
@@ -48,10 +50,10 @@ pub fn random_position_outside_screen(state: &State) -> Vec2 {
     let direction = directions.choose().expect("Failed to get random direction");
 
     match direction {
-        Direction::Top => position.y = -100.0,
-        Direction::Bottom => position.y = state.window_height + 100.0,
-        Direction::Left => position.x = -100.0,
-        Direction::Right => position.x = state.window_width + 100.0,
+        Direction::Top => position.y = -offset,
+        Direction::Bottom => position.y = state.window_height + offset,
+        Direction::Left => position.x = -offset,
+        Direction::Right => position.x = state.window_width + offset,
     }
 
     position

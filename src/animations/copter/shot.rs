@@ -27,11 +27,15 @@ impl CopterAnimation {
             shot.position = shot.position + distance;
 
             // Check enemy collision
-            for (enemy_index, enemy) in self.enemies.iter().enumerate() {
+            for (enemy_index, enemy) in self.enemies.iter_mut().enumerate() {
                 let distance = shot.position - enemy.position;
                 if distance.length() < 50.0 {
-                    enemies_to_remove.push(enemy_index);
                     shots_to_remove.push(shot_index);
+
+                    enemy.health -= 1;
+                    if enemy.health == 0 {
+                        enemies_to_remove.push(enemy_index);
+                    }
                 }
             }
 
@@ -69,6 +73,11 @@ impl CopterAnimation {
                 // Get the closest enemy.
                 let mut best_position: Option<(f32, Vec2)> = None;
                 for enemy in self.enemies.iter() {
+                    // Don't shoot at enemies, that cannot be seen yet.
+                    if outside_screen(state, enemy.position).is_some() {
+                        continue;
+                    }
+
                     let distance = (copter_position - enemy.position).length();
                     if let Some((old_distance, _)) = best_position {
                         if old_distance > distance {
@@ -90,6 +99,22 @@ impl CopterAnimation {
         self.shot_timer = self.shot_timer.checked_add(delta_duration()).unwrap();
         if self.shot_timer > self.shot_timeout {
             self.shot_timer = Duration::from_secs(0);
+        }
+    }
+
+    pub fn draw_shots(&self) {
+        for shot in self.shots.iter() {
+            draw_texture_ex(
+                self.textures.shot,
+                shot.position.x,
+                shot.position.y,
+                Color::from_rgba(255, 255, 255, 255),
+                DrawTextureParams {
+                    rotation: shot.angle,
+                    flip_y: true,
+                    ..Default::default()
+                },
+            )
         }
     }
 

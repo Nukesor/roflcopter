@@ -16,16 +16,14 @@ pub struct Textures {
 
 impl Textures {
     pub fn new(state: &State) -> Textures {
-        let enemy = " ┍─
--╪═══>
- ┕─";
+        let enemy = "===>";
 
         Textures {
             right_copter_right_rotor: generate_copter_texture(state, Side::Right, Side::Right),
             right_copter_left_rotor: generate_copter_texture(state, Side::Right, Side::Left),
             left_copter_right_rotor: generate_copter_texture(state, Side::Left, Side::Right),
             left_copter_left_rotor: generate_copter_texture(state, Side::Left, Side::Left),
-            shot: texture_from_text(state, "<=", state.font_size, None),
+            shot: texture_from_text(state, "=>", state.font_size, None),
             enemy: texture_from_text(state, enemy, state.font_size, None),
         }
     }

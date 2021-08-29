@@ -12,15 +12,6 @@ pub struct Enemy {
     pub health: usize,
 }
 
-impl Enemy {
-    pub fn new(position: Vec2) -> Self {
-        Enemy {
-            position,
-            health: 2,
-        }
-    }
-}
-
 impl CopterAnimation {
     /// Update the enemy position and check collisions with shots.
     pub fn update_enemies(&mut self) {
@@ -39,20 +30,29 @@ impl CopterAnimation {
 
     /// Update the enemy spawn timer and spawn enemies, if it's time.
     pub fn spawn_enemies(&mut self, state: &State) {
+        // Global flag to stop spawning enemies.
         if !self.spawn_enemies {
             return;
         }
-        self.enemy_timer += delta_duration();
 
-        // It isn't time yet.
-        if self.enemy_timer < self.enemy_duration {
+        // Update timer and check if it's time to spawn a wave.
+        self.enemy_wave_timer += delta_duration();
+        if self.enemy_wave_timer < self.enemy_wave_timeout {
             return;
+        } else {
+            self.enemy_wave_timer = Duration::from_secs(0);
         }
 
-        self.enemy_timer = Duration::from_secs(0);
-
-        self.enemies
-            .push(Enemy::new(random_position_outside_screen(state)));
+        // Spawn enemies in a cluster around a random point outside the screen.
+        let offset = state.window_width / 10.0;
+        let cluster_center = random_position_outside_screen(state, offset);
+        for _ in 0..self.enemy_wave_size {
+            let position = cluster_center + random_vector_with_lenght(offset);
+            self.enemies.push(Enemy {
+                position,
+                health: self.enemy_max_health,
+            });
+        }
     }
 
     /// Update the enemy spawn timer and spawn enemies, if it's time.
@@ -60,11 +60,12 @@ impl CopterAnimation {
         let copter_position = self.get_copter_position();
         for enemy in self.enemies.iter() {
             let direction = copter_position - enemy.position;
+            let health_percent = enemy.health as f32 / self.enemy_max_health as f32;
             draw_texture_ex(
                 self.textures.enemy,
                 enemy.position.x,
                 enemy.position.y,
-                RED,
+                Color::new(1.0, 1.0 * health_percent, 1.0 * health_percent, 1.0),
                 DrawTextureParams {
                     rotation: vec2_to_radian(direction),
                     flip_y: true,
