@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use super::{CopterImages, Shot};
-use crate::{animations::helper::Side, state::State};
+use crate::{helper::*, state::State};
 
 /// Lower level helicopter drawing call.
 /// This is a simple wrapper around some of macroquads drawing logic.

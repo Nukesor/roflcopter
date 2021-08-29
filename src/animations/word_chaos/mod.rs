@@ -2,8 +2,8 @@ use std::{collections::HashMap, f32::consts::PI, time::Duration};
 
 use macroquad::{prelude::*, rand::gen_range};
 
-use super::helper::{delta_duration, rotate_vec2};
-use crate::{animations::helper::*, state::State};
+use crate::helper::*;
+use crate::state::State;
 
 #[derive(Debug, Clone)]
 pub struct Word {
@@ -49,7 +49,7 @@ impl WordChaosAnimation {
     pub fn new(state: &State) -> WordChaosAnimation {
         let word = state.random_word();
         let font_size = (state.font_size as f32 * 1.5) as u16;
-        let textures = textures_from_text(state, &word, false, font_size);
+        let textures = textures_from_text(state, &word, font_size, 5, None);
 
         WordChaosAnimation {
             words: vec![Word {
@@ -82,7 +82,7 @@ impl WordChaosAnimation {
             angle_rotation: gen_range(0.1, 0.2),
             font_size: self.font_size,
         }];
-        self.texture_map = textures_from_text(state, &self.current, false, self.font_size);
+        self.texture_map = textures_from_text(state, &self.current, self.font_size, 5, None);
     }
 
     /// Restart the animation, with a new word.
@@ -101,7 +101,7 @@ impl WordChaosAnimation {
     /// Update our word texture.
     /// This is necessary, if the screen get's resized.
     pub fn update_texture(&mut self, state: &State) {
-        self.texture_map = textures_from_text(state, &self.current, false, self.font_size);
+        self.texture_map = textures_from_text(state, &self.current, self.font_size, 5, None);
     }
 
     pub fn update(&mut self, state: &State) {

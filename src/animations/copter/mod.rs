@@ -11,7 +11,7 @@ mod images;
 
 use self::draw::{draw_copter, draw_shot};
 pub use self::images::CopterImages;
-use super::helper::*;
+use crate::helper::*;
 use crate::state::State;
 
 #[derive(Debug, Clone)]
@@ -92,7 +92,7 @@ impl CopterAnimation {
 
             enemies: vec![],
             spawn_enemies: false,
-            enemy_texture: texture_from_text(state, "HURENSOHN", false, state.font_size),
+            enemy_texture: texture_from_text(state, "HURENSOHN", state.font_size, None),
             enemy_speed: state.window_width / 20.0,
             enemy_duration: Duration::from_millis(100),
             enemy_timer: Duration::from_secs(0),

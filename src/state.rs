@@ -3,11 +3,9 @@ use std::{fs::read_to_string, ops::Add, path::Path, time::Duration};
 use macroquad::{prelude::*, rand::ChooseRandom};
 
 use crate::{
-    animations::{
-        helper::{delta_duration, side, Side},
-        Animation, CopterState,
-    },
+    animations::{Animation, CopterState},
     color,
+    helper::*,
     shaders::load_shaders,
 };
 

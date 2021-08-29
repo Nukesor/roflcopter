@@ -1,8 +1,8 @@
 use macroquad::prelude::Vec2;
 use roflcopter_snake_lib::game_state::GameState;
 
+pub use crate::helper::*;
 pub use copter::*;
-pub use helper::*;
 pub use wall::WallAnimation;
 
 use crate::state::State;
@@ -10,7 +10,6 @@ use crate::state::State;
 use self::word_chaos::WordChaosAnimation;
 
 pub mod copter;
-pub mod helper;
 pub mod wall;
 pub mod word_chaos;
 

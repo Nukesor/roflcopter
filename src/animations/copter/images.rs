@@ -1,10 +1,7 @@
 use macroquad::prelude::Texture2D;
 
 use super::draw::draw_raw_copter;
-use crate::{
-    animations::helper::{texture_from_text, Side},
-    state::State,
-};
+use crate::{helper::*, state::State};
 
 /// A struct used to store dynamically generated images of the roflcopter.
 #[derive(Debug, Clone)]
@@ -23,7 +20,7 @@ impl CopterImages {
             right_copter_left_rotor: draw_raw_copter(state, Side::Right, Side::Left),
             left_copter_right_rotor: draw_raw_copter(state, Side::Left, Side::Right),
             left_copter_left_rotor: draw_raw_copter(state, Side::Left, Side::Left),
-            shot: texture_from_text(state, &state.word, true, state.font_size),
+            shot: texture_from_text(state, &state.word, state.font_size, Some(&state.colors)),
         }
     }
 
