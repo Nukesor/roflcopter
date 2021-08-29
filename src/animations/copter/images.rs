@@ -1,6 +1,6 @@
 use macroquad::prelude::{Texture2D, Vec2};
 
-use super::draw::draw_raw_copter;
+use super::draw::generate_copter_texture;
 use crate::{helper::*, state::State};
 
 /// A struct used to store dynamically generated images of the roflcopter.
@@ -16,10 +16,10 @@ pub struct CopterImages {
 impl CopterImages {
     pub fn new(state: &State) -> CopterImages {
         CopterImages {
-            right_copter_right_rotor: draw_raw_copter(state, Side::Right, Side::Right),
-            right_copter_left_rotor: draw_raw_copter(state, Side::Right, Side::Left),
-            left_copter_right_rotor: draw_raw_copter(state, Side::Left, Side::Right),
-            left_copter_left_rotor: draw_raw_copter(state, Side::Left, Side::Left),
+            right_copter_right_rotor: generate_copter_texture(state, Side::Right, Side::Right),
+            right_copter_left_rotor: generate_copter_texture(state, Side::Right, Side::Left),
+            left_copter_right_rotor: generate_copter_texture(state, Side::Left, Side::Right),
+            left_copter_left_rotor: generate_copter_texture(state, Side::Left, Side::Left),
             shot: texture_from_text(state, &state.word, state.font_size, Some(&state.colors)),
         }
     }
@@ -28,10 +28,10 @@ impl CopterImages {
     /// This is necessary, if we dynamically change our font size.
     ///  For instance, during window resizes.
     pub fn update(&mut self, state: &State) {
-        self.right_copter_right_rotor = draw_raw_copter(state, Side::Right, Side::Right);
-        self.right_copter_left_rotor = draw_raw_copter(state, Side::Right, Side::Left);
-        self.left_copter_right_rotor = draw_raw_copter(state, Side::Left, Side::Right);
-        self.left_copter_left_rotor = draw_raw_copter(state, Side::Left, Side::Left);
+        self.right_copter_right_rotor = generate_copter_texture(state, Side::Right, Side::Right);
+        self.right_copter_left_rotor = generate_copter_texture(state, Side::Right, Side::Left);
+        self.left_copter_right_rotor = generate_copter_texture(state, Side::Left, Side::Right);
+        self.left_copter_left_rotor = generate_copter_texture(state, Side::Left, Side::Left);
     }
 
     pub fn copter_dimensions(&self) -> Vec2 {

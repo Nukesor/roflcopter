@@ -27,45 +27,64 @@ pub fn textures_from_text(
 }
 
 /// Create a texture for a given text.
+/// If no color is given, we default to white.
 pub fn texture_from_text(
     state: &State,
-    word: &str,
+    text: &str,
     font_size: u16,
     colors: Option<&Vec<Color>>,
 ) -> Texture2D {
     clear_background(Color::from_rgba(0, 0, 0, 0));
     let font_dimensions = measure_text("j", Some(state.font), font_size, 1.0);
 
-    let mut x = 0.0;
-    for (index, character) in word.chars().enumerate() {
-        let color = if let Some(colors) = colors {
-            colors[index]
-        } else {
-            Color::new(1.0, 1.0, 1.0, 1.0)
-        };
+    // Remember the amount of lines and the max character width.
+    // We need this to calculate the rectangle that should be extracted from the
+    // full screen later on.
+    let mut max_y = font_dimensions.height;
+    let mut max_x = 0.0;
 
-        draw_text_ex(
-            &character.to_string(),
-            x,
-            font_dimensions.height,
-            TextParams {
-                font: state.font,
-                font_size,
-                font_scale: 1.0,
-                color,
-                ..Default::default()
-            },
-        );
-        x += font_dimensions.width;
+    let mut x: f32;
+    for line in text.lines() {
+        x = 0.0;
+        for (index, character) in line.chars().enumerate() {
+            // Take the provided colors or fallback to white.
+            let color = if let Some(colors) = colors {
+                colors[index]
+            } else {
+                Color::new(1.0, 1.0, 1.0, 1.0)
+            };
+
+            draw_text_ex(
+                &character.to_string(),
+                x,
+                max_y,
+                TextParams {
+                    font: state.font,
+                    font_size,
+                    font_scale: 1.0,
+                    color,
+                    ..Default::default()
+                },
+            );
+            x += font_dimensions.width;
+        }
+
+        // Move the draw position to the next line
+        max_y += font_dimensions.height;
+
+        // Remember the longest line.
+        if x > max_x {
+            max_x = x;
+        }
     }
 
     // Make a screenshot and extract the roflcopter from it.
     let image = get_screen_data();
     let image = image.sub_image(Rect {
         x: 0.0,
-        y: image.height as f32 - font_dimensions.height - font_dimensions.offset_y / 2.0,
-        w: x,
-        h: font_dimensions.height + font_dimensions.offset_y / 2.0,
+        y: image.height as f32 - max_y,
+        w: max_x,
+        h: max_y,
     });
 
     clear_background(BLACK);

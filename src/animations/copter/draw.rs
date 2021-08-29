@@ -27,66 +27,15 @@ pub fn draw_copter(
     )
 }
 
-/// Draw the actual helicopter one character at a time.
-/// Once this is done, we create a image from that data.
-///
-/// That raw pre-compiled image can then be re-used for the rest of the animation.
-pub fn draw_raw_copter(state: &State, copter_direction: Side, rotor_direction: Side) -> Texture2D {
-    clear_background(Color::from_rgba(0, 0, 0, 0));
-    let mut x: f32;
-    let mut y: f32 = 0.0;
-    let art = get_ascii_art(&rotor_direction, &copter_direction);
+/// Generate the helicopter texture, depending on the directions.
+pub fn generate_copter_texture(
+    state: &State,
+    copter_direction: Side,
+    rotor_direction: Side,
+) -> Texture2D {
+    let text = get_ascii_art(&rotor_direction, &copter_direction);
 
-    // Remember the amount of lines and the max character width.
-    // We need this to calculate the rectangle that should be extracted from the
-    // full screen later on.
-    let mut max_y = 0.0;
-    let mut max_x = 0.0;
-
-    //println!("timer: {:?}, duration: {:?}", timer, duration);
-    //println!("offset: {}", offset);
-    //println!("current_rotation: {}", offset);
-    for line in art.lines() {
-        x = 0.0;
-        for character in line.chars() {
-            draw_text_ex(
-                &character.to_string(),
-                x,
-                y,
-                TextParams {
-                    font: state.font,
-                    font_size: state.font_size,
-                    font_scale: 1.0,
-                    ..Default::default()
-                },
-            );
-            x += state.font_dimensions.width;
-        }
-        // Move the draw position to the next
-        y += state.font_dimensions.height;
-
-        if x > max_x {
-            max_x = x;
-        }
-
-        if y > max_y {
-            max_y = y;
-        }
-    }
-
-    // Make a screenshot and extract the roflcopter from it.
-    let image = get_screen_data();
-    let image = image.sub_image(Rect {
-        x: 0.0,
-        y: image.height as f32 - max_y,
-        w: max_x,
-        h: max_y,
-    });
-
-    clear_background(BLACK);
-
-    // Create a texture from our roflcopter image.
-    Texture2D::from_image(&image)
+    texture_from_text(state, &text, state.font_size, None)
 }
 
 /// Get the correct ascii art, depending on the copter direction and rotor orientation.
