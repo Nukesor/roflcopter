@@ -15,7 +15,7 @@ pub fn draw_copter(
 ) {
     let texture = images.get_for_directions(copter_direction, rotor_direction);
     draw_texture_ex(
-        texture,
+        *texture,
         x,
         y,
         Color::from_rgba(255, 255, 255, 255),

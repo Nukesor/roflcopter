@@ -37,14 +37,14 @@ impl CopterAnimation {
                 // The speed per second is relative to the screen width.
                 let speed = state.window_width / 4.0;
                 // Calculate the traveled distance for this frame
-                let direction = dest.sub(position.clone());
+                let direction = dest.sub(*position);
                 let normalized = direction.normalize();
                 let traveling = normalized * speed * get_frame_time();
 
                 *position = position.add(traveling);
 
                 // If we reached the position, start hovering for a random time.
-                if dest.sub(position.clone()).length() < 50.0 {
+                if dest.sub(*position).length() < 50.0 {
                     let copter_direction = if position.x > dest.x {
                         Side::Left
                     } else {
@@ -81,8 +81,8 @@ impl CopterAnimation {
                 self.copter_state = CopterState::Flying {
                     position: position.clone(),
                     dest: Vec2::new(
-                        gen_range(0.0, width - dimensions.0),
-                        gen_range(0.0, height - dimensions.1),
+                        gen_range(0.0, width - dimensions.x),
+                        gen_range(0.0, height - dimensions.y),
                     ),
                 };
             }

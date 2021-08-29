@@ -4,6 +4,10 @@ use macroquad::prelude::*;
 
 use crate::state::State;
 
+pub fn middle_texture_position(position: Vec2, texture: &Texture2D) -> Vec2 {
+    position + Vec2::new(texture.width() / 2.0, texture.height() / 2.0)
+}
+
 /// Create a texture map of different font sizes.
 /// All textures for font sizes between start_font_size -/+ offset will be generated.
 pub fn textures_from_text(

@@ -95,10 +95,10 @@ impl CopterAnimation {
 
     /// Spawn a new shot depending on the current position and copter state.
     pub fn spawn_shot(&mut self, dest: Vec2) {
-        // Calculate the middle of the copter.
         let dimensions = self.copter_images.copter_dimensions();
-        let copter_position = self.get_copter_position();
-        let middle = copter_position + Vec2::new(dimensions.0 / 2.0, dimensions.1 / 2.0);
+        // Calculate the middle of the copter.
+        let middle =
+            middle_texture_position(self.get_copter_position(), self.copter_images.texture());
 
         match self.copter_state {
             CopterState::Flying { .. } => {
@@ -108,18 +108,18 @@ impl CopterAnimation {
                 // Rotate the offset depending on the current directoin
                 let shot_offset = match direction {
                     Side::Left => {
-                        let shot_offset = Vec2::new(-dimensions.0 / 2.0, 0.0);
+                        let shot_offset = Vec2::new(-dimensions.x / 2.0, 0.0);
                         rotate_vec2(shot_offset, -PI / 8.0)
                     }
                     Side::Right => {
-                        let shot_offset = Vec2::new(dimensions.0 / 2.0, 0.0);
+                        let shot_offset = Vec2::new(dimensions.x / 2.0, 0.0);
                         rotate_vec2(shot_offset, PI / 8.0)
                     }
                 };
 
                 let position = middle + shot_offset;
                 let distance = dest - position;
-                let angle = distance.y.atan2(distance.x);
+                let angle = vec2_to_radian(distance);
 
                 self.shots.push(Shot {
                     position,
@@ -133,13 +133,13 @@ impl CopterAnimation {
             } => {
                 // Rotate the offset depending on the current directoin
                 let shot_offset = match copter_direction {
-                    Side::Left => Vec2::new(-dimensions.0 / 2.0, 0.0),
-                    Side::Right => Vec2::new(dimensions.0 / 2.0, 0.0),
+                    Side::Left => Vec2::new(-dimensions.x / 2.0, 0.0),
+                    Side::Right => Vec2::new(dimensions.x / 2.0, 0.0),
                 };
 
                 let position = middle + shot_offset;
                 let distance = dest - position;
-                let angle = distance.y.atan2(distance.x);
+                let angle = vec2_to_radian(distance);
 
                 self.shots.push(Shot {
                     position: position.clone(),

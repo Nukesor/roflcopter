@@ -1,4 +1,4 @@
-use macroquad::prelude::Texture2D;
+use macroquad::prelude::{Texture2D, Vec2};
 
 use super::draw::draw_raw_copter;
 use crate::{helper::*, state::State};
@@ -34,23 +34,31 @@ impl CopterImages {
         self.left_copter_left_rotor = draw_raw_copter(state, Side::Left, Side::Left);
     }
 
-    pub fn copter_dimensions(&self) -> (f32, f32) {
-        (
+    pub fn copter_dimensions(&self) -> Vec2 {
+        Vec2::new(
             self.right_copter_left_rotor.width(),
             self.right_copter_left_rotor.height(),
         )
     }
 
+    pub fn texture(&self) -> &Texture2D {
+        &self.right_copter_right_rotor
+    }
+
     /// Simple helper, which gets the correct texture for a copter and rotor orientation.
-    pub fn get_for_directions(&self, copter_direction: &Side, rotor_direction: &Side) -> Texture2D {
+    pub fn get_for_directions(
+        &self,
+        copter_direction: &Side,
+        rotor_direction: &Side,
+    ) -> &Texture2D {
         match copter_direction {
             Side::Right => match rotor_direction {
-                Side::Right => self.right_copter_right_rotor.clone(),
-                Side::Left => self.right_copter_left_rotor.clone(),
+                Side::Right => &self.right_copter_right_rotor,
+                Side::Left => &self.right_copter_left_rotor,
             },
             Side::Left => match rotor_direction {
-                Side::Right => self.left_copter_right_rotor.clone(),
-                Side::Left => self.left_copter_left_rotor.clone(),
+                Side::Right => &self.left_copter_right_rotor,
+                Side::Left => &self.left_copter_left_rotor,
             },
         }
     }
