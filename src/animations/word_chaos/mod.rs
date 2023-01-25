@@ -59,7 +59,7 @@ impl WordChaosAnimation {
                 color: random_color(),
                 angle: 0.0,
                 angle_rotation: gen_range(0.1, 0.5),
-                font_size: font_size,
+                font_size,
             }],
             word_limit: 500,
             texture_map: textures,
@@ -116,8 +116,8 @@ impl WordChaosAnimation {
         let font_sizes: Vec<u16> = self.texture_map.keys().cloned().collect();
 
         for (index, word) in self.words.iter_mut().enumerate() {
-            word.angle = word.angle + word.angle_rotation * dt;
-            word.position = word.position + word.acceleration * dt;
+            word.angle += word.angle_rotation * dt;
+            word.position += word.acceleration * dt;
             let middle = word.mid_position(state);
 
             let collision = outside_screen(state, middle);
@@ -131,7 +131,7 @@ impl WordChaosAnimation {
                     word.length -= 1;
 
                     if (current_words + new_words.len()) < self.word_limit {
-                        let mut new_word = get_new_word(state, &word, max_speed);
+                        let mut new_word = get_new_word(state, word, max_speed);
                         new_word.font_size = font_sizes[gen_range(0, font_sizes.len() - 1)];
                         new_words.push(new_word);
                     }
@@ -142,7 +142,7 @@ impl WordChaosAnimation {
 
                     // Slightly change acceleration
                     word.acceleration = rotate_vec2(word.acceleration, gen_range(0.1, 0.4));
-                    word.acceleration = word.acceleration * gen_range(1.1, 1.2);
+                    word.acceleration *= gen_range(1.1, 1.2);
 
                     match collision {
                         Direction::Right => {
@@ -228,8 +228,8 @@ impl WordChaosAnimation {
 
 fn get_new_word(state: &State, word: &Word, max_speed: f32) -> Word {
     let mut new_word = Word { ..word.clone() };
-    new_word.acceleration.x = new_word.acceleration.x * gen_range(1.1, 1.3);
-    new_word.acceleration.y = new_word.acceleration.y * gen_range(1.1, 1.3);
+    new_word.acceleration.x *= gen_range(1.1, 1.3);
+    new_word.acceleration.y *= gen_range(1.1, 1.3);
 
     new_word.acceleration = new_word.acceleration.clamp_length_max(max_speed);
 

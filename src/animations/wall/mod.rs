@@ -42,13 +42,13 @@ impl WallAnimation {
         y_rate += y_rate.signum() * 0.2;
 
         let moved_amount = dt * y_rate * y_movement_speed;
-        self.y_offset = self.y_offset + moved_amount;
+        self.y_offset += moved_amount;
 
         // Set the movement speed relative to the text glyph width.
         let x_movement_speed = state.font_dimensions.width * 1.0;
         let x_rate = ((time * 0.3f64 / 1000.0f64).sin()) as f32;
         let moved_amount = dt * x_rate * x_movement_speed;
-        self.x_offset = self.x_offset + moved_amount;
+        self.x_offset += moved_amount;
 
         // Prevent floating too far away, due to floating point imprecision
         if self.x_offset < -state.window_width / 2.0 {
@@ -65,7 +65,7 @@ impl WallAnimation {
         // We start at -100, as lines can shift upwards slowly
         let mut used_height = -100.0;
         while (state.window_height + 100.0) > used_height {
-            self.draw_line(&state, used_height, line);
+            self.draw_line(state, used_height, line);
             line += 1;
             used_height += state.font_dimensions.height;
         }
@@ -118,13 +118,11 @@ impl WallAnimation {
 
                 // Don't draw the char, if it cannot be seen anyway.
                 let mut skip = false;
-                if width < 0.0 - state.font_dimensions.width {
-                    skip = true;
-                } else if width > state.window_width {
-                    skip = true;
-                } else if height < 0.0 - state.font_dimensions.height {
-                    skip = true;
-                } else if height > state.window_height + state.font_dimensions.height {
+                if width < 0.0 - state.font_dimensions.width
+                    || width > state.window_width
+                    || height < 0.0 - state.font_dimensions.height
+                    || height > state.window_height + state.font_dimensions.height
+                {
                     skip = true;
                 }
 
@@ -150,6 +148,12 @@ impl WallAnimation {
             current_width += glyph_width;
             color_offset = (color_offset + 1) % state.word.len();
         }
+    }
+}
+
+impl Default for WallAnimation {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

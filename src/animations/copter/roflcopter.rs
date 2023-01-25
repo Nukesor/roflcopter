@@ -6,16 +6,16 @@ use std::{
 
 use macroquad::{prelude::*, rand::gen_range};
 
-use super::{draw::draw_copter, CopterAnimation, CopterState};
+use super::{draw::draw_roflcopter, RoflcopterAnimation, RoflcopterState};
 use crate::helper::*;
 use crate::state::State;
 
-impl CopterAnimation {
+impl RoflcopterAnimation {
     /// Move the helicopter and tick any timers.
     ///
     /// This logic is also responsible for setting the next internal state once the previous
     /// animation has finished.
-    pub fn update_copter(&mut self, state: &State) {
+    pub fn update_roflcopter(&mut self, state: &State) {
         // This is the rotor animation.
         // This animation is always active.
         self.rotor_timer = self.rotor_timer.checked_add(delta_duration()).unwrap();
@@ -28,8 +28,8 @@ impl CopterAnimation {
         }
 
         // Update state dependant variables.
-        match self.copter_state {
-            CopterState::Flying {
+        match self.roflcopter_state {
+            RoflcopterState::Flying {
                 ref mut position,
                 ref dest,
             } => {
@@ -51,15 +51,15 @@ impl CopterAnimation {
                         Side::Right
                     };
 
-                    self.copter_state = CopterState::Hovering {
+                    self.roflcopter_state = RoflcopterState::Hovering {
                         duration: Duration::from_secs(gen_range(1, 3)),
                         timer: Duration::from_secs(0),
-                        position: position.clone(),
+                        position: *position,
                         copter_direction,
                     };
                 }
             }
-            CopterState::Hovering {
+            RoflcopterState::Hovering {
                 ref mut timer,
                 ref duration,
                 ref position,
@@ -78,8 +78,8 @@ impl CopterAnimation {
 
                 let dimensions = self.textures.copter_dimensions();
 
-                self.copter_state = CopterState::Flying {
-                    position: position.clone(),
+                self.roflcopter_state = RoflcopterState::Flying {
+                    position: *position,
                     dest: Vec2::new(
                         gen_range(0.0, width - dimensions.x),
                         gen_range(0.0, height - dimensions.y),
@@ -90,20 +90,20 @@ impl CopterAnimation {
     }
 
     /// Draw the helicopter, depending on the current state.
-    pub fn draw_copter(&self, state: &State) {
-        match self.copter_state {
-            CopterState::Flying {
+    pub fn draw_roflcopter(&self, state: &State) {
+        match self.roflcopter_state {
+            RoflcopterState::Flying {
                 ref position,
                 ref dest,
             } => {
                 let copter_direction = side(position, dest);
 
                 let angle = match copter_direction {
-                    Side::Left => -PI as f32 / 8.0,
-                    Side::Right => PI as f32 / 8.0,
+                    Side::Left => -PI / 8.0,
+                    Side::Right => PI / 8.0,
                 };
 
-                draw_copter(
+                draw_roflcopter(
                     &self.textures,
                     &copter_direction,
                     &self.rotor_direction,
@@ -112,7 +112,7 @@ impl CopterAnimation {
                     angle,
                 );
             }
-            CopterState::Hovering {
+            RoflcopterState::Hovering {
                 ref timer,
                 ref position,
                 ref copter_direction,
@@ -121,13 +121,13 @@ impl CopterAnimation {
                 // We animate hovering by following in a sinus curve depending on the time
                 let mut current_rotation = (timer.as_millis() as f64 / 1000.0f64) as f32;
                 // Speed up things a little
-                current_rotation = current_rotation * 1.2;
+                current_rotation *= 1.2;
 
                 let offset = (current_rotation * 2.0 * PI).sin();
                 let x = position.x;
                 let y = position.y + offset * state.font_dimensions.height;
 
-                draw_copter(
+                draw_roflcopter(
                     &self.textures,
                     copter_direction,
                     &self.rotor_direction,

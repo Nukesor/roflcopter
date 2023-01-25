@@ -3,8 +3,6 @@ name = "roflcopter"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 name = "roflcopter_lib"
 path = "src/lib.rs"
@@ -14,9 +12,8 @@ name = "roflcopter"
 path = "src/main.rs"
 
 [dependencies]
-macroquad = "0.3"
-log = "0.4"
-simplelog = { version = "0.12", default-features = false }
 better-panic = "0.3"
-
-roflcopter_snake = { git = "https://github.com/hildebro/roflcopter.git", branch = "master" }
+log = "0.4"
+macroquad = "0.3"
+roflcopter_snake = { git = "https://github.com/nukesor/roflcopter-snake.git", branch = "master" }
+simplelog = { version = "0.12", default-features = false }

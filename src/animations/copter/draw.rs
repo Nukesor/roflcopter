@@ -5,7 +5,7 @@ use crate::{helper::*, state::State};
 
 /// Lower level helicopter drawing call.
 /// This is a simple wrapper around some of macroquads drawing logic.
-pub fn draw_copter(
+pub fn draw_roflcopter(
     images: &Textures,
     copter_direction: &Side,
     rotor_direction: &Side,

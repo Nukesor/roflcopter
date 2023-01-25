@@ -2,7 +2,7 @@ use std::{f32::consts::PI, time::Duration};
 
 use macroquad::prelude::*;
 
-use super::{CopterAnimation, CopterState};
+use super::{RoflcopterAnimation, RoflcopterState};
 use crate::helper::*;
 use crate::state::State;
 
@@ -13,7 +13,7 @@ pub struct Shot {
     pub angle: f32,
 }
 
-impl CopterAnimation {
+impl RoflcopterAnimation {
     /// Tick all shots and spawn new ones, if the mouse is down.
     pub fn update_shots(&mut self, state: &State) {
         // Move all shots and check if they hit something or are off screen.
@@ -24,7 +24,7 @@ impl CopterAnimation {
             let speed = state.window_width / 60.0;
             let direction = Vec2::new(shot.angle.cos(), shot.angle.sin());
             let distance = direction * speed;
-            shot.position = shot.position + distance;
+            shot.position += distance;
 
             // Check enemy collision
             for (enemy_index, enemy) in self.enemies.iter_mut().enumerate() {
@@ -124,8 +124,8 @@ impl CopterAnimation {
         // Calculate the middle of the copter.
         let middle = middle_texture_position(self.get_copter_position(), self.textures.texture());
 
-        match self.copter_state {
-            CopterState::Flying { .. } => {
+        match self.roflcopter_state {
+            RoflcopterState::Flying { .. } => {
                 // Check in which direction we're flying.
                 let direction = side(&middle, &dest);
 
@@ -151,7 +151,7 @@ impl CopterAnimation {
                     angle,
                 })
             }
-            CopterState::Hovering {
+            RoflcopterState::Hovering {
                 ref copter_direction,
                 ..
             } => {
@@ -166,7 +166,7 @@ impl CopterAnimation {
                 let angle = vec2_to_radian(distance);
 
                 self.shots.push(Shot {
-                    position: position.clone(),
+                    position,
                     direction: copter_direction.clone(),
                     angle,
                 })

@@ -3,7 +3,7 @@ use std::{fs::read_to_string, ops::Add, path::Path, time::Duration};
 use macroquad::{prelude::*, rand::ChooseRandom};
 
 use crate::{
-    animations::{Animation, CopterState},
+    animations::{Animation, RoflcopterState},
     color,
     helper::*,
     shaders::load_shaders,
@@ -226,29 +226,28 @@ impl State {
 
         self.mouse_position = (x, y);
 
-        match animation {
-            // While in copter mode, the copter should follow the mouse.
-            Animation::Copter(ref mut copter) => match copter.copter_state {
-                CopterState::Hovering { position, .. } => {
-                    copter.copter_state = CopterState::Flying {
-                        position: position.clone(),
+        // While in copter mode, the copter should follow the mouse.
+        if let Animation::Copter(ref mut copter) = animation {
+            match copter.roflcopter_state {
+                RoflcopterState::Hovering { position, .. } => {
+                    copter.roflcopter_state = RoflcopterState::Flying {
+                        position,
                         dest: Vec2::new(x, y),
                     };
                 }
-                CopterState::Flying {
+                RoflcopterState::Flying {
                     ref mut dest,
                     ref position,
                     ..
                 } => {
                     let dimensions = copter.textures.copter_dimensions();
-                    let new_dest = match side(position, &dest) {
+                    let new_dest = match side(position, dest) {
                         Side::Left => Vec2::new(x, y - dimensions.y / 2.0),
                         Side::Right => Vec2::new(x - dimensions.x, y - dimensions.y / 2.0),
                     };
                     *dest = new_dest;
                 }
-            },
-            _ => {}
+            }
         }
     }
 
@@ -272,7 +271,7 @@ impl State {
             match animation {
                 Animation::Wall(_) => {}
                 Animation::Copter(inner) => inner.textures.update(self),
-                Animation::WordChaos(inner) => inner.update_texture(&self),
+                Animation::WordChaos(inner) => inner.update_texture(self),
                 Animation::Snake(_) => {}
             }
         }
@@ -293,10 +292,10 @@ impl State {
 
         // Change the animation duration by one sec
         if is_key_pressed(macroquad::prelude::KeyCode::K) {
-            self.animation_duration = self.animation_duration + Duration::from_secs(1);
+            self.animation_duration += Duration::from_secs(1);
         }
         if is_key_pressed(macroquad::prelude::KeyCode::J) {
-            self.animation_duration = self.animation_duration - Duration::from_secs(1);
+            self.animation_duration -= Duration::from_secs(1);
             if self.animation_duration < Duration::from_secs(2) {
                 self.animation_duration = Duration::from_secs(2);
             }

@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use macroquad::prelude::*;
 
-use super::CopterAnimation;
+use super::RoflcopterAnimation;
 use crate::helper::*;
 use crate::state::State;
 
@@ -12,7 +12,7 @@ pub struct Enemy {
     pub health: usize,
 }
 
-impl CopterAnimation {
+impl RoflcopterAnimation {
     /// Update the enemy position and check collisions with shots.
     pub fn update_enemies(&mut self) {
         let copter_position = self.get_copter_position();
@@ -24,7 +24,7 @@ impl CopterAnimation {
 
             let direction = copter_position - enemy.position;
             let distance = (direction / direction.length()) * self.enemy_speed * get_frame_time();
-            enemy.position = enemy.position + distance;
+            enemy.position += distance;
         }
     }
 

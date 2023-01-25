@@ -2,10 +2,10 @@ use std::time::Duration;
 
 use macroquad::prelude::*;
 
-mod copter;
 mod draw;
 mod enemy;
 mod images;
+mod roflcopter;
 mod shot;
 
 use self::enemy::*;
@@ -15,10 +15,10 @@ use crate::helper::*;
 use crate::state::State;
 
 #[derive(Debug, Clone)]
-pub struct CopterAnimation {
+pub struct RoflcopterAnimation {
     pub textures: Textures,
 
-    pub copter_state: CopterState,
+    pub roflcopter_state: RoflcopterState,
     rotor_direction: Side,
     rotor_duration: Duration,
     rotor_timer: Duration,
@@ -37,7 +37,7 @@ pub struct CopterAnimation {
 }
 
 #[derive(Debug, Clone)]
-pub enum CopterState {
+pub enum RoflcopterState {
     Flying {
         position: Vec2,
         dest: Vec2,
@@ -50,20 +50,20 @@ pub enum CopterState {
     },
 }
 
-impl CopterAnimation {
-    pub fn new(state: &State, position: Vec2) -> CopterAnimation {
-        let copter_state = CopterState::Flying {
+impl RoflcopterAnimation {
+    pub fn new(state: &State, position: Vec2) -> RoflcopterAnimation {
+        let copter_state = RoflcopterState::Flying {
             position,
             dest: Vec2::new(100.0, 100.0),
         };
 
-        CopterAnimation {
+        RoflcopterAnimation {
             rotor_direction: Side::Left,
             rotor_duration: Duration::from_millis(200),
             rotor_timer: Duration::from_secs(0),
 
             textures: Textures::new(state),
-            copter_state,
+            roflcopter_state: copter_state,
 
             shot_timeout: Duration::from_millis(300),
             shot_timer: Duration::from_secs(0),
@@ -84,20 +84,20 @@ impl CopterAnimation {
         self.spawn_enemies(state);
         self.update_enemies();
 
-        self.update_copter(state);
+        self.update_roflcopter(state);
     }
 
     /// Draw the copter depending on the current animation state.
     pub fn draw(&self, state: &State) {
         self.draw_shots();
         self.draw_enemies();
-        self.draw_copter(state);
+        self.draw_roflcopter(state);
     }
 
     fn get_copter_position(&self) -> Vec2 {
-        match self.copter_state {
-            CopterState::Flying { position, .. } => position,
-            CopterState::Hovering { position, .. } => position,
+        match self.roflcopter_state {
+            RoflcopterState::Flying { position, .. } => position,
+            RoflcopterState::Hovering { position, .. } => position,
         }
     }
 }

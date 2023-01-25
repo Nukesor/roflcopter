@@ -14,7 +14,7 @@ pub fn load_shaders() -> Vec<Material> {
     vec![lens_material]
 }
 
-const LENS_FRAGMENT_SHADER: &'static str = r#"#version 100
+const LENS_FRAGMENT_SHADER: &str = r#"#version 100
 precision lowp float;
 
 varying vec2 uv;
@@ -31,7 +31,7 @@ void main() {
 }
 "#;
 
-const LENS_VERTEX_SHADER: &'static str = "#version 100
+const LENS_VERTEX_SHADER: &str = "#version 100
 attribute vec3 position;
 attribute vec2 texcoord;
 
