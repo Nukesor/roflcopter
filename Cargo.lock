@@ -492,7 +492,7 @@ dependencies = [
 [[package]]
 name = "roflcopter_snake"
 version = "0.1.0"
-source = "git+https://github.com/nukesor/roflcopter-snake.git?branch=master#1a962c0fb5a6f6f65d865a169c3e1424bf565d9d"
+source = "git+https://github.com/hildebro/roflcopter-snake.git?branch=master#282eb8abd84719c1eac2a7fa4debb7f1fae5efd5"
 dependencies = [
  "lazy_static",
  "macroquad",

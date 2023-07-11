@@ -15,5 +15,5 @@ path = "src/main.rs"
 better-panic = "0.3"
 log = "0.4"
 macroquad = "0.3"
-roflcopter_snake = { git = "https://github.com/nukesor/roflcopter-snake.git", branch = "master" }
+roflcopter_snake = { git = "https://github.com/hildebro/roflcopter-snake.git", branch = "master" }
 simplelog = { version = "0.12", default-features = false }
